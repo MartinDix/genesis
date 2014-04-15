@@ -1,0 +1,85 @@
+
+README - genesis2.1
+===================
+
+Genesis2.1 is the more modularised version of the SCM namelist creator software to create namelists from NWP fields.  This is a useful tool in the development and testing of model parameterisations in that it simplifies the preparation stages of namelist generation and enables the user to create their own environments as a framework for SCM studies which are based on approximate real world (or model world) conditions - hence the Genesis moniker.
+
+Input data is required as global fields in NetCDF format and set out on regular lat/lon grids (no staggering) and pressure levels (in Pascals).  The code should be able to cope with most resolutions greater than 5x5 degrees (that is, grid spacing less than 5 degrees).
+
+Two powerpoint files are also included (in *.pdf format).  One is a general descriptor of the Genesis program presented at the April SCM users meeting at CMAR.  The second includes a series of screenshots taken using the assembly of the UM-derived datasets with some suggestions of useful STASH settings to get the fields appropriate for forcing the SCM.
+
+The code requires the preparation of 3 namelist files containing data specific to each run:
+
+files.inp
+- lists the names of the input files in order: mslp,z,u,v,t,q
+
+dates.dat
+- lists the dates corresponding to each time slice of model run period
+>> included in the example directory is a program 'datetraj2.f' which generates sequential date lists written by Kevin Keay (used with permission).  Copy the datetraj.2.txt file it generates to the 'dates.dat' file when assembling your input data.
+>> http://www.earthsci.unimelb.edu.au/php/view_profile.php?id=keay
+
+base.inp
+- is a namelist containing input specific to the model run including switches for the inclusion of particular forcing fields as required
+
+[[ offset.dat ]] - optional
+- ERA40 data downloaded directly from the ecmwf.int/ website is formatted with an offset applied to the data.  This is automatically converted if the *.nc files are opened with 'xconv', however if you haven't done this then you can specify an offset file of format:
+
+[add] [multiplier]
+  .        .
+  .        .
+
+etc...
+
+for each of the six input NWP fields files.  To my knowledge this is only the case for ERA40 NWP input - haven't seen ERA-Interim.  But in general (and this is recommended) - datafiles once downloaded (in NetCDF or GRIB format) should be opened and saved as NetCDFs in xconv.  You need to quickly check through the grid dimensions and values (ie: lats = -90:90; lons=0:360, levs=pressure) as this is the most common error in running this tool.
+
+
+========
+Makefile
+========
+
+- The makefile is set up to compile genesis2.0 on gale at the Bureau.  You may need to change the FC, LIBDIR and INCDIR paths to point to local versions of your f90 compiler and NetCDF libraries.
+- The make options are:
+  make all or make genesis: compiles all objects and genesis executable
+  make clean: removes all object files from source directory
+  make new: first removes all existing object files and creates a new executable, then tidies up new object files.
+- MacOSX BUG: the 'ngtopt.f' routine appears to compile okay on open source ifortran compilers, but fails to execute in the
+              main program.  Mac users need to hack the default settings in the main 'genesis.f90' program for now - will look for
+              a fix.  Try creating with a g77 -c?
+
+
+------------------------
+ Usage: genesis
+   genesis [options] < base.inp                                   << note the inclusion of the base.inp namelist in the command line
+   -d        verbose, debug mode
+   -h        help
+   -t        no. of time increments (def=20)
+   -l        no. of levels of input data (def=20)
+   -x        no. of longitudes (def=29)
+   -y        no. of latitudes (def=17)
+   -X        user defined longitude (eg: 243.7)
+   -Y        user defined latitude (eg: 65.0)
+   -D        use date file (def = false)
+   -O        use offset file (def = false)
+   -E        ERA40 data (def = false)
+   -J        JRA data (def = false)
+   -N        NCEP data (def = false)
+   -U        UM data (def = false)
+
+-------------------------
+
+The user defines the desired latitude and longitude as well as the dimensions of the input NetCDFs (found easily by ncdump -h file.nc >! hdr) and specifies the source of the NWP data.  As reanalyses are not uniform in format, some standardization of some diagnostics is done during the data read stage.  Genesis then interpolates the global fields to this point.  Linear interpolation from the nearest neighbour grid points is currently used, although there is room for coding of more sophisticated interpolation methods in future versions if the need arises.
+
+In its present form, the SCM results are not directly comparable to observations of the same period, however this is not the current intention.  Care must be taken in choosing the input parameters so as not to force the model too violently or run it for too long - particularly in midlatitudes where Ug is changing.  The most appropriate settings will vary according to the variables under investigation - the user is expected to examine the forcing fields before running the model.
+
+The user must also be aware that the default setting is for a sea point with constant t_star forcing which on its own may not be all that realistic, but the settings are such that the output namelist is 'SCM-ready'.  Parameters such as tstar and vertical wind speed are left constant or zero for the user to determine.
+
+There is also an option to input wind profiles directly and relax the model to these over a set period or to include these forcings as increments which are calculated as linear differences in time.  Temperature and humidity are always forced by advective increments.
+
+An additional output file is created immediately prior to the generation of the output namelist called 'genesis.scm'.  This contains profiles of z,p,t,theta,q,u,v,ug and vg for each time slice for examination by the user - and may also be adapted to alter the model initial conditions for ensemble runs if desired, however no routines exist to extract and insert these at this stage (this is an early version - suggestions for improvement are most welcome).  The code is modularised to a reasonable degree, so hopefully any additions you may like to include yourself should plug in reasonably easily.
+
+It is hoped that genesis will provide additional variety in experimentation with the SCM, targeting specific settings/locations in the UM by forcing with model output and statistical analyses of multiple ensemble runs (ref. Hume and Jakob, 2005; 2007).  Included are some example files from the UM and ERA40 datasets which have been tested.  Before running the SCM - ensure that the other SCM namelists (SIZES, INITHIS, CNTLATM, etc...) and the nfor settings in your SCM match those of the namelist - you might need to recompile your scm.exe in order to run the model successfully.
+
+Finally - even though this is version 2.0 of the setup it is quite likely there may be a few remnant bugs.  The geostrophic wind calculations need to be looked at but aren't too critical at this point.  Most errors should be limited to the reading in of the NetCDF files.  Every effort has been made to convert the diverging formats of NWP input to a standard form before passing from the ncread_* routines, but some errors may still be lurking.
+
+Please direct any questions on this program to me at:
+v.barras@bom.gov.au

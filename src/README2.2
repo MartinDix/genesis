@@ -1,0 +1,36 @@
+README 2.2
+**********
+
+Now using Greg's upgrade on flurry which has had a few adjustments (mostly
+compiler related).  Some search routines have been simplified and array bounds
+fixed, however the main change is variable lat/lon input allowing a user to
+use SCM in a Lagrangian sense (following a diagnostic of interest).
+
+I intend to import the generic NetCDF read routines from my diurnal2d program - 
+will use UM output as initial template and test other NWP formats as they arise,
+however every effort should be made to standardise the input NetCDF format prior
+to running Genesis - might try and develop a test program.
+
+vjb 8/11/2010
+
+Update (22/12/2010)
+
+The upgrade of the genesis program is now complete and creates a SCM6.3 namelist
+with sensible output.  Genesis can now read the dimensions of the NetCDF fields
+directly - now, this works in principle on UM output data but may require a few
+tweaks to ensure the array dimensions are in the right order - eg: ERA data has
+vertical levels in the opposite direction to the UM (!!)  There is currently no
+correction for this - will write it if there is a need.
+
+This completes the 2.2 upgrade.
+
+The question for version 2.3 is how to apply the vertical velocities.  At the moment
+advective tendencies of temperature and moisture do not take into account the
+vertical advection of the scalar variables of temperature and moisture which puts
+it at odds with the formulation of Neggers et al.  Another thing that needs adding
+is the Coriolis term in the large scale forcing of momentum: (f(Vg - V)) These are
+not major effects but will be necessary for publication of any results (KNMI setup etc...)
+
+Likely will need vertical velocities from the model output (or 'driver' files from KNMI)
+- need to plan carefully how to best implement these into the genesis main program. 
+

@@ -1,0 +1,30 @@
+
+README 2.3
+==========
+
+<copied from README2.2>
+The question for version 2.3 is how to apply the vertical velocities.  At the moment
+advective tendencies of temperature and moisture do not take into account the
+vertical advection of the scalar variables of temperature and moisture which puts
+it at odds with the formulation of Neggers et al.  Another thing that needs adding
+is the Coriolis term in the large scale forcing of momentum: (f(Vg - V)) These are
+not major effects but will be necessary for publication of any results (KNMI setup etc...)
+
+Likely will need vertical velocities from the model output (or 'driver' files from KNMI)
+- need to plan carefully how to best implement these into the genesis main program.
+
+
+***********
+
+From interp_linear.f90 the horizontal tendencies are worked out.  Need a call to an
+equivalent vertical tendency calculation.  Add a z-component to the gradt and gradq 
+calculations (T, q only) and then multiply by omega (using pressure co-ordinates).
+
+Need to read in omega from source input.  If z is available only then multiply by dp/dz to
+get omega via chain rule.
+
+25/1/2011: Now both vertical velocities and coriolis terms have been added to the 
+calculation of advective tendencies (gradz and geostr subroutines).  Next is to
+adapt the namelists to SCM7.5 - a relatively simple fix it turns out, this will be
+a change to the 'template' file.  Also, need to check that the p_in and nminin settings
+are correct before running.

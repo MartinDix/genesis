@@ -1,0 +1,18 @@
+README 2.1
+**********
+
+Fixes so far are:
+
+1. bug found in vn2.0 'search_grid.f90'
+Error if usrlat & data(n) were the same
+FIX:
+>> modulus function calculates absolute departures rather than +/- 
+
+2. error in same_y and same_x flags not being raised - no check in main.f
+FIX:
+>> if checks on x(y)index values after find_latlon added to genesis.f90
+
+PROPOSED:
+>> Testing of generic NetCDF read routines ncread_dim and ncread_data to remove
+the need for separate setups for each reanalysis.  Approach works for diurnal2d
+but not sure about odd dimension values of ERA and JRA

@@ -1,0 +1,33 @@
+
+
+README 2.4
+==========
+
+The next (and probably final) upgrade is to take model analysis data from MARS on
+pressure levels and use it to drive the SCM.  For this there needs to be a conversion
+between RelH to Specific Humidity as RelH is the only moisture variable output
+on pressure levels.
+
+The subroutine 'establ.f' has been taken from the Melbourne Uni GCM and is called
+via the -R switch in the command line (see help -h option).
+
+The routine gradz.f90 has also been added to interp_linear.f90 to augment the advective
+tendencies of humidity and temperature with a vertical component.
+
+The model is particularly sensitive to vertical velocities, therefore it is recommended
+that you use as short a timestep as possible if doing runs of more than a 3 days or so.
+
+Note also that inclusion of all the advective tendencies can constrain the SCM quite
+strongly, possibly even overriding particular processes you're interested in so have a
+thoughtful approach to the way you're forcing the model and the sensitivities you want
+to test.
+
+For longer timesteps you can comment out the vertical advective component for T and q
+in interp_linear.f90 and still get good simulations.  Try also switching radiation off
+(in CNTLATM) and driving from the surface with TSTAR_FORCING.
+
+There seems to be a bug somewhere in the land surface scheme, so attempting to switch
+this on at the moment fails - seems ok in 6.3.
+
+- vjb 22/2/2011
+
