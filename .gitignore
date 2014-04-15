@@ -1,0 +1,11 @@
+# Object files
+*.o
+# Module files
+*.mod
+
+# Editor tmp files
+*~
+
+# Binaries
+src/genesis
+src/genesis/datetraj/datetraj
