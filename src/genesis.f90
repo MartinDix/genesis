@@ -161,32 +161,7 @@
 	narg = iargc()
        
         if (narg.eq.0)then
-100      write(*,*)''
-         write(*,*)'Usage: genesis'				
-         write(*,*)'  genesis [options] < base.inp'	
-         write(*,*)'  -d        verbose, debug mode'
-         write(*,*)'  -h        help'
-         write(*,*)'  -X        user defined longitude (eg: 243.7)'
-         write(*,*)'  -Y        user defined latitude (eg: 65.0)'
-         write(*,*)'  -R        convert RelH to spec hum (def = false)'
-         write(*,*)'  -M        convert sfc pressure from hPa to Pa (def = false)'
-         write(*,*)'  -D        use date file (def = false)'
-         write(*,*)'  -O        use offset file (def = false)'
-         write(*,*)''
-         write(*,*)'If the only moisture field available is Relative Humidity, the -R option'
-         write(*,*)'will calculate the equivalent specific humidity from the temperature field'
-         write(*,*)''
-         write(*,*)'You also need a few files in the run directory for this to work.'
-	 write(*,*)' a) files.inp - a file listing the *.nc file names in order: ps,z,u,v,t,q'
-	 write(*,*)' b) offset.dat (optional) - list of offset parameters from'
-	 write(*,*)'     ncdump hdr [scale, add]'
-	 write(*,*)'              - if geopotential needs converting only (m2/s2 >> m)'
-	 write(*,*)'                then use -O with offset file set to 1 0 for each.' 
-	 write(*,*)' c) dates.dat (reqd) - a list of dates/times corresponding to data records.' 
-	 write(*,*)'     [generate using datetraj - yyyymmdd hhhh]'
-         write(*,*)''
-         write(*,*)'NB: ensure all fields are on the same grids - check for staggering of'
-         write(*,*)'    momentum/scalar fields.  Recommend Xconv to do quick conversion.'
+         call write_help()
          stop
         endif
 
@@ -209,7 +184,10 @@
 	
 	do while (iopt.ne.-1)
          iopt = ngtopt('dhX:Y:RMDO',nopt,optarg)			! <<
-         if (char(iopt).eq.'h') go to 100
+         if (char(iopt).eq.'h') then 
+          call write_help()
+          stop
+         end if
          if (char(iopt).eq.'d') debug = .true.
          if (char(iopt).eq.'X') usrx = optarg
          if (char(iopt).eq.'Y') usry = optarg
@@ -734,5 +712,35 @@
 	call create_namelist(NRECS,umlev,u_um,dug,v_um,dvg,w_um,t_um,q_um,p_um,pt_um,  &
      &			     gradt_um,gradq_um,ymd,hr,usrlat,usrlon,debug)
 	
-	end program genesis
-	
+        contains
+          subroutine write_help()
+            implicit none
+             write(*,*)''
+             write(*,*)'Usage: genesis'
+             write(*,*)'  genesis [options] < base.inp'
+             write(*,*)'  -d        verbose, debug mode'
+             write(*,*)'  -h        help'
+             write(*,*)'  -X        user defined longitude (eg: 243.7)'
+             write(*,*)'  -Y        user defined latitude (eg: 65.0)'
+             write(*,*)'  -R        convert RelH to spec hum (def = false)'
+             write(*,*)'  -M        convert sfc pressure from hPa to Pa (def = false)'
+             write(*,*)'  -D        use date file (def = false)'
+             write(*,*)'  -O        use offset file (def = false)'
+             write(*,*)''
+             write(*,*)'If the only moisture field available is Relative Humidity, the -R option'
+             write(*,*)'will calculate the equivalent specific humidity from the temperature field'
+             write(*,*)''
+             write(*,*)'You also need a few files in the run directory for this to work.'
+             write(*,*)' a) files.inp - a file listing the *.nc file names in order: ps,z,u,v,t,q'
+             write(*,*)' b) offset.dat (optional) - list of offset parameters from'
+             write(*,*)'     ncdump hdr [scale, add]'
+             write(*,*)'              - if geopotential needs converting only (m2/s2 >> m)'
+             write(*,*)'                then use -O with offset file set to 1 0 for each.' 
+             write(*,*)' c) dates.dat (reqd) - a list of dates/times' // &
+       &                             ' corresponding to data records.' 
+             write(*,*)'     [generate using datetraj - yyyymmdd hhhh]'
+             write(*,*)''
+             write(*,*)'NB: ensure all fields are on the same grids - check for staggering of'
+             write(*,*)'    momentum/scalar fields.  Recommend Xconv to do quick conversion.'
+          end subroutine write_help
+        end program genesis
