@@ -28,6 +28,7 @@
 
 	degsearch = 5.0 !valid for access-g
 	degsearch = 0.5 !valid for access-c where dlat=0.05deg =>steps of 0.001
+        degsearch = 5.0 !valid for era      where dlat=0.75deg =>steps of 0.01
         mmax = 500
         delta = degsearch/float(mmax)
         gacc = 0.5*delta

@@ -20,7 +20,8 @@
 	integer,intent(in)			:: nrec,nlev,nlat,nlon
 	real,dimension(nlev,nrec),intent(in)	:: t
 	
-	real,dimension(nlon,nlat,nrec,nlev),intent(in)	:: z_in
+!	real,dimension(nlon,nlat,nrec,nlev),intent(in)	:: z_in
+	real,dimension(nlon,nlat,nlev,nrec),intent(in)	:: z_in
 	
 	real,dimension(nlev),intent(in)		:: levs
 	real,dimension(nlat),intent(in)		:: lats
@@ -81,11 +82,18 @@
 
 	 do k=1,nlev
      
-	  dphidx(k,rec) = (z_in(fxeindex(rec),fynindex(rec),k,rec)              &
-     &                     -z_in(fxwindex(rec),fynindex(rec),k,rec))/dx(rec)
-     
-	  dphidy(k,rec) = (z_in(fxeindex(rec),fynindex(rec),k,rec)              &
-     &                     -z_in(fxeindex(rec),fysindex(rec),k,rec))/dy(rec)
+          if (dx(rec).eq.0.)then
+            dphidx(k,rec) = 0.0
+          else
+	    dphidx(k,rec) = (z_in(fxeindex(rec),fynindex(rec),k,rec)           &
+     &                       -z_in(fxwindex(rec),fynindex(rec),k,rec))/dx(rec)
+          endif
+          if (dy(rec).eq.0.)then
+            dphidy(k,rec) = 0.0
+          else
+	    dphidy(k,rec) = (z_in(fxeindex(rec),fynindex(rec),k,rec)           &
+     &                       -z_in(fxeindex(rec),fysindex(rec),k,rec))/dy(rec)
+          endif
 	  
 	  ug(k,rec) = (-1/f)*(dphidy(k,rec))
 	  

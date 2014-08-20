@@ -120,6 +120,13 @@
            dy(rec) = surfdist(lats(fynindex(rec)+1),lons(fxeindex(rec)),lats(fysindex(rec)),    &
      &	        lons(fxeindex(rec)))
 
+         elseif((fxeindex(rec).eq.fxwindex(rec)).and.(fynindex(rec).eq.fysindex(rec)))then
+
+           dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)+1),lats(fynindex(rec)),    &
+     &	        lons(fxwindex(rec)))
+           dy(rec) = surfdist(lats(fynindex(rec)+1),lons(fxeindex(rec)),lats(fysindex(rec)),    &
+     &	        lons(fxeindex(rec)))
+
 	 else
 
 	   dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)),lats(fynindex(rec)),    &
@@ -247,15 +254,31 @@
 
      	     elseif (i.eq.5)then
 
-     	      gradtx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 5 = Temp.
-    	      gradty(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+               if (dx(rec).eq.0.)then
+                 gradtx(k,rec) = 0.0
+               else
+     	         gradtx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 5 = Temp.
+               endif
+               if (dy(rec).eq.0.)then
+                 gradty(k,rec) = 0.0
+               else
+        	 gradty(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+               endif
 
      	      i_int5(k,rec) = i_var(k,rec)
      	      
      	     elseif (i.eq.6)then
 
-     	      gradqx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 6 = Spec.H
-     	      gradqy(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+               if (dx(rec).eq.0.)then
+                 gradqx(k,rec) = 0.0
+               else
+        	 gradqx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 6 = Spec.H
+               endif
+               if (dy(rec).eq.0.)then
+                 gradqy(k,rec) = 0.0
+               else
+     	         gradqy(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+               endif
      	    
      	      i_int6(k,rec) = i_var(k,rec)
 

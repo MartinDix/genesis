@@ -46,6 +46,7 @@
 	character*15				:: outfile(max)
 	logical					:: there
 	logical					:: L_vlatlon
+	logical					:: L_w_inOK
 
 
 !------------------------------
@@ -124,7 +125,7 @@
 	integer						:: xeindex
 	integer						:: xwindex
 
-	real						:: factx,facty
+	real						:: factx,facty,adum
 	
 !-----------------------------
 !	Variable lon/lat forcing arrays
@@ -227,8 +228,10 @@
 
 	nfiles = i-1
 	
-	if (debug) print *,'nfiles = ',nfiles
-	if (nfiles.lt.maxfiles) stop'Not enough input files specified'	
+        L_w_inOK   = .false. !if we do/do not have w_in,set w_inOK=true/false
+	if (debug) print *,'L_w_inOK = ',L_w_inOK
+	if (debug) print *,'nfiles,maxfiles = ',nfiles,maxfiles
+	if (nfiles.lt.maxfiles.and.L_w_inOK.ne..false.) stop'Not enough input files specified'	
 	if (nfiles.gt.maxfiles) stop'Too many input files specified'	
 
 
@@ -330,6 +333,12 @@
           q_in = data
 
 	  if (debug) print *,'q = ',q_in(20,20,10,1)
+          if (L_w_inOK.ne..true.) then
+            print *,'L_w_inOK',L_w_inOK
+            allocate(w_in(NLONS,NLATS,NLVLS,NRECS))           ! vjb 2.3
+            w_in = 0.0*q_in
+            if (debug) print *,'w = ',w_in(20,20,10,1)
+          endif
 
          elseif (k.eq.7)then
 
@@ -633,6 +642,7 @@
 	print *,'Outfile written successfully: genesis.scm'
 
 	print *,'Searching for base namelist...did you specify it in cmd line?'
+        crec=NRECS !glr 29-04-2014
 
 
 !--------------------------------------------------------------------	
@@ -651,6 +661,25 @@
 	allocate(gradt_um(umlev+1,NRECS))	
 	allocate(gradq_um(umlev+1,NRECS))	
 
+!       setup initial um field values
+        do j=1,NRECS
+         do k=1,umlev
+          ug_um(k,j)=0.0
+          vg_um(k,j)=0.0
+          u_um(k,j) =0.0
+          v_um(k,j) =0.0
+         enddo
+         do k=1,umlev+1
+          p_um(k,j) =0.0
+          pt_um(k,j) =0.0
+          w_um(k,j) =0.0
+          t_um(k,j) =0.0
+          q_um(k,j) =0.0
+          gradt_um(k,j) =0.0
+          gradq_um(k,j) =0.0
+         enddo
+        enddo
+
 	call charney_phillips(NRECS,NLVLS,levs,z,u,v,w,t,q,pt,msl,gradt,gradq, &
      &				    u_um,v_um,w_um,t_um,q_um,p_um,pt_um, &
      &                              gradt_um,gradq_um,debug)
@@ -661,12 +690,16 @@
 
 	open(4,file='charney.scm')
 	  
-           do k=1,umlev+1   
-	     write(4,21)p_um(k,crec),levs(k),t_um(k,crec),pt_um(k,crec), &
+           do k=1,umlev+1
+             adum=0.0
+             if (k.le.NLVLS) adum=levs(k)
+	     write(4,21)p_um(k,crec),adum,t_um(k,crec),pt_um(k,crec), &
      &	       q_um(k,crec),u_um(k,crec),v_um(k,crec),w_um(k,crec)
+             print *,'D03',k,crec,v_um(k,crec),w_um(k,crec)
 	   enddo
 
-21      format(1(f9.0,' '),2(f8.2),' ',e12.5,' ',3(f8.2))       
+!21      format(1(f9.0,' '),2(f8.2),' ',e12.5,' ',3(f8.2))       
+21      format(1(f9.0,' '),2(f9.2),' ',e12.5,' ',3(f8.2))       
 	close(4)
 	
 	print *,'Outfile written successfully: charney.scm'

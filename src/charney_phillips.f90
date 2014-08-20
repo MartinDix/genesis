@@ -94,7 +94,7 @@
 
 !====================!     
 
-	allocate(zrho(umlev+1))
+	allocate(zrho(umlev))
 	allocate(ztheta(umlev+1))
 	allocate(zzt(umlev+1))
 	allocate(zzr(umlev))
@@ -253,12 +253,13 @@
 
 	print *,'n = ',n
 
-	stop
+!	stop
 
 
 !------ Interpolate variables onto UM theta levels ------
 !
 
+        do rec = 1,nrec
 	  do k = 1,nzum+1 !glr
 
 	    t_um(k,rec) = 273.0			! ...default
@@ -309,6 +310,7 @@
 
 	  
 	   enddo
+	 enddo
 	  
 
 	return

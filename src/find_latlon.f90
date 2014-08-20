@@ -76,7 +76,9 @@
 	
 	
 !	print *,'Found nearest gridpoints to specified lat/lon'
-	
+	print *,'glrindex',ynindex,ysindex,xeindex,xwindex
+        print *,'glrindex',lat(ynindex),lat(ysindex),lon(xeindex),lon(xwindex)
+
 !--------- Check to see if indices are the same --------
 !
 	if (ynindex.eq.ysindex)then
