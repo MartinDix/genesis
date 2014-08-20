@@ -22,6 +22,8 @@ F90_SOURCES=charney_phillips.f90 genesis.f90 gradz.f90 \
 
 OBJS=$(F_SOURCES:.f=.o) $(F90_SOURCES:.f90=.o)
 
+default : genesis
+
 # Clear out the suffixes
 .SUFFIXES:
 
@@ -53,8 +55,6 @@ $(OBJS) : global.o
 #       search_grid.o geostr.o surfdist.o \
 #       radian.o charney_phillips.o create_namelist.o modulus.o \
 #       ncread_dim.o ncread_data.o
-
-default: genesis
 
 genesis: $(OBJS)
 	$(FC) ${FCFLAGS} $(LIBDIR) $(LIBS) $(INCDIR) -o $@ $^
