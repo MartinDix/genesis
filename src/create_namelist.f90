@@ -123,7 +123,7 @@
 	
 	dt = hr(jt0+1) - hr(jt0)
 !        print *,'glr: dt=',dt
-        dt = dt*0.01 !glr
+!        dt = dt*0.01 !glr
 !        print *,'glr: dt=dt*.01=',dt
 	if (dt.le.0) dt=dt+24.0
 	fact = 24.0/dt
