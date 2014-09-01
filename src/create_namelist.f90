@@ -312,7 +312,7 @@
           write(2,*)'HOUR_INIT=     ',shour,','
           field = .false.
 	 elseif(bfld.eq.'NMININ')then
-          write(2,*)'NMININ=     ',int((nfor*dt-1)*60),','	! -301=-5hrs1min !glr
+          write(2,*)'NMININ=     ',int((nfor-1)*dt*60),','	! -301=-5hrs1min !glr
           field = .false.
 20       elseif(bfld.eq.'TSTAR_FORCING')then
 	  ch7 = '*288.0,'
