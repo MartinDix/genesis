@@ -1,0 +1,277 @@
+Program Genesis
+  - Read Arguments
+  - Check for presents of config files
+  - read netCDF file names from files.inp
+  loop over files:
+    
+    CALL ncread_dim
+      - opens file
+      - requests # of dims, vars, global atts, and the id of the unlimited dim.
+      if 4 vars: 
+        - reduced dims flag set
+        loop over # of vars:
+          - ask for varname of var, store in var(4) array
+          - set lon_varid = 1, lat_varid = 2, rec_varid = 3, and dat_varid = 4
+      if 5 vars:
+        - similar to 4, but lvl_varid = 3, rec_varid = 4, dat_varid = 5
+      if reduced dim flag:
+        get the dim-lengths, but move rec to i = 4
+      else:
+        get dim-lengths
+      returns just ncid, and # of vars, # of lons, lats, levs, and recs.
+    allocate arrays for lon, lat, lvl, rec, and data
+
+    CALL ncread_data
+      for all vars, get varid from name
+      then get the data.
+      close netCDF file
+    copy the read data to <var>_in, hPa->Pa for MSL
+  parse the user lat/lon into a long frclon and frclat arrays (len: NREC, val=const)
+  Finds the nearest lat/lon gridpoints to the user specified ones.
+  multiplies all levs with 100 (hPa->Pa?)
+
+  CALL interp_linear
+    calculates dx and dy indices with the distance between the neighboring gridpoints.
+    calculates factx and facty as the fractions of the N and E gridpoints.
+    interpolates the input data:
+      with the 5th and 6th field it calculates the gradients in X and Y,
+      stores them in gradtx/y and gradqx/y
+
+  CALL gradz
+    if omega (=i_int7) >0 and k == 1:
+      dp = 1/2 (lev2 - lev1)
+      dt = temp difference
+      dq = specific humidity difference
+      gradtz = dt/dp
+      gradqz = dq/dp
+    else if omega < 0 and k == 1
+      dp = dt = dq = gradtz = gradqz = 0
+    else if k == k_max
+      opposite of k == 1 (inv omega as well)
+    else:
+      dp = dist. bt. midpoint beneath level and midpoint above level
+      dt and dq equivalent
+      gradtz = dt/dp
+      gradqz = dq/dp
+  gradt = -1*((i_int3 * gradtx) + (i_int4 * gradty) + (i_int7 * gradtz))
+  gradq = -1*((i_int3 * gradqx) + (i_int4 * gradqy) + (i_int7 * gradqz))
+    (note: 	i_int3 is interpolated u, 
+            i_int4 is interpolated v, and
+            i_int7 is interpolated w)
+
+  CALL geostr
+    pt = t * (100000/levs)^rcp     (with rcp being 287./1004.) (Potential Temperature)
+    LOOP over rec
+      f = 2*omg*sin(frclat)        (omg = 7.292e-05) (remember to convert degrees to radian)
+      LOOP over nlev
+        if dx==0 => dphidx = 0
+        else dphidx = (z_in(NE) - z_in(NW)) / dx
+        if dy==0 => dphidy = 0
+        else dphidy = (z_in(NE) - z_in(SE)) / dy
+        ug = -dphidy/f
+        vg =  dphidx/f
+    RETURN ug, uv, pt, and f
+  if dates: read dates into ymd and hr arrays
+  else: complain bitterly and stop.
+
+  ===================== START WRITING genesis.scm ==============================
+  open genesis.scm
+  LOOP over recs
+    write ymd, hr, msl, NLVLS+1, usrlat, and usrlon (first three have different values for different recs, other three are const.)
+    write 0, msl, t, pt, q, u, v, w, ug, vg for first level
+    LOOP over levels (including first)
+      write z, levs, t, pt, q, u, v, w, ug, vg
+  close genesis.scm
+
+  allocate arrays, dim (umlev, nrecs): u_um, ug_um, v_um, vg_um
+  allocate arrays, dim (umlev+1, nrecs): p_um, pt_um, w_um, t_um, q_um, gradt_um, gradq_um
+
+  CALL charney_phillips
+    reads z_terrain_asl, znum from STDIN
+    reads z_top_of_model, first_constant_r_rho_level, eta_theta, and eta_rho from STDIN
+    LOOP over levels
+      ztheta = eta_theta * z_top_of_model
+      zzt = ztheta + z_terrain_asl
+      zrho = eta_rho * z_top_of_model
+      zzr = zrho + z_terrain_asl
+
+    ------------ calc p_um
+    LOOP over recs
+      LOOP over levels
+        IF zzr < z(1)
+          dp = -1 * rho * gravity * zzr
+          p_um = msl + dp
+        ELSEIF zzr > z(lev)
+          fact = (zzr - z) / (maxz - z)
+          p_um = levs * (1-fact)
+        ELSE
+          upr = lowest level with zzr >= z
+          lwr = upr - 1
+          fact = (zzr - z(lwr)) / (z(upr) - z(lwr))
+          p_um = levs(lwr)*(1-fact) + fact*levs(upr)
+      p_um(umlev+1) = 100.0
+
+    ----------- calc u_um and v_um
+    LOOP over recs
+      LOOP over levs
+        cd = vkman / log(zzr(1)/zrough)        (vkman = 0.4, zrough = 0.2)
+        IF zzr < z(1)
+          wspd = sqrt( u(1)^2 + v(1)^2 )
+          usfc = 0.2
+          aa = cd * wspd
+          ab = 2 * usfc / (sqrt(cd)*wspd)
+          ustar = aa * (0.5 + 0.5*sqrt(1-ab^2))
+          ensure ustar >= 0.08
+          u_um = v_um = (ustar/vkman) * log(zzr/zrough)
+        ELSEIF zzr > z(nlev)
+          fact = (zzr - z(nlev)) / (maxz - z(nlev))
+          u_um = u(nlev) * (1-fact)
+          v_um = v(nlev) * (1-fact)
+        ELSE
+          upr = lowest level with zzr < z(upr)
+          lwr = upr - 1
+          fact = (zzr - z(lwr)) / (z(upr) - z(lwr))
+          u_um = u(lwr) * (1-fact) + fact * u(upr)
+          v_um = v(lwr) * (1-fact) + fact * v(upr)
+
+    CALL q2relh
+      LOOP over recs
+        LOOP over levs
+          temp1 = t
+          CALL establ (calculates saturation vapour pressure according to long table)
+          vap = (q*lev)/0.622
+          relh = (vap/es) * 100
+      RETURN relh
+
+    CALL slingo
+      lyrs1 = lyrs2 = lyrs3 = 0
+      LOOP over levels
+        IF 80k <= levs          => increment lyrs1
+        IF 37k <= levs < 80k    => increment lyrs2
+        IF 12k5 <= levs < 37k   => increment lyrs3
+      LOOP over recs
+        LOOP over levels
+          IF 80k <= levs
+            IF relh >= 80
+              nl = (relh-80)^2 / 400.
+            ELSE
+              nl = 0.
+          ELSEIF 37k <= levs
+            IF relh >= 65
+              nm = (relh-65)^2 / 1225.
+            ELSE
+              nm = 0.
+          ELSEIF 12k5 <= levs
+            IF relh >= 80
+              nh = (relh-80)^2 / 400.
+            ELSE
+              nh = 0.
+        n = nl + nm + nh
+        IF n >= 1
+          n = 0.0
+      RETURNS n(dim: 1:nrec)
+    LOOP over recs
+      LOOP over levels (nzum+1)
+        Set the values to some defaults (constants or values of level 1)
+        t_um = 273.00
+        q_um = 0.0
+        pt_um = 400.
+        w_um = w(1)
+        t_um = t(1)
+        q_um = q(1)
+        pt_um = p(1)
+        gradt_um = gradt(1)
+        gradq_um = gradq(1)
+        IF zzt <= z(nlev)
+          LOOP over levels (kk = 2..nlev)
+            IF z(kk-1) <= zzt <= z(kk)
+              fact = (zzt - z(kk-1)) / (z(kk) - z(kk-1))
+              w_um = w(kk-1) * (1-fact) + fact * w(kk)
+              t_um = ...
+              q_um = ...
+              pt_um = ...
+              gradt_um = ...
+              gradq_um = ...
+              BREAK
+    RETURN p_um, u_um, v_um, w_um, t_um, q_um, pt_um, gradt_um, gradq_um
+
+  =================== START WRITING charney.scm ================================
+  OPEN file
+  LOOP over levels (k = 1..umlev+1)
+    IF k <= NLVLS   => adum = levs(k)
+    ELSE            => adum = 0.0
+    write p_um, adum, t_um, pt_um, q_um, u_um, v_um, w_um (rec = NREC)
+  CLOSE file
+
+  dug = f * (vg_um - v_um)
+  dvg = f * (ug_um - u_um)
+  (note: f comes from geostr, ug_um and vg_um are 0, but might be implemented in charney_phillips)
+
+  CALL create_namelist
+    READS ui,vi,wi,theta,qi,p_in from STDIN
+    READS L_windrlx,tau_rlx,L_vertadv,tstar_forcing,flux_e,flux_h,u_inc,v_inc,w_inc,t_inc,q_star,ichgf from STDIN
+    READS sdate,shour,edate,ehour,year,month,day from STDIN
+
+    jt0  = index of first record at or after start date
+    jt1  = index of first record at or after end date
+    dt   = difference in hours between successive records
+    fact = number of records per day
+    nfor = number of records between and including jt0 and jt1
+    nn   = nfor * nlev
+
+    OPEN template.scm
+    OPEN namelist.scm
+
+    diag = field = FALSE
+
+    LOOP
+      READ line, BREAK on EOF
+      backspace template
+      READ first word
+        IF '=' in word
+          field = TRUE
+          j = location of = in word
+        ELSE
+          diag = TRUE
+      IF field
+        bfld = field name
+        IF L_windrlx
+          Depending on what bfld was, write
+          L_winrlx = .TRUE.
+          nfor= [1+jt1-jt0],
+          TAU_RLX = [dt*3600.]
+          U_INC= [u_um(1:nlev, jt0:jt1)]
+          V_INC= [v_um(1:nlev, jt0:jt1)]
+          W_INC= [w_um(1:nlev, jt0:jt1)]
+          T_INC= [fact*(t_um(1:nlev+1, jt0+1:jt1)-t_um(1:nlev+1, jt0:jt1-1))]
+          Q_STAR= [fact*(q_um(:,jt0+1:jt1)-q_um(:,jt0:jt1-1))]
+        ELSE
+          L_windrlx = .FALSE.
+          nfor= [1+jt1-jt0]
+          U_INC= [ (u_um(:,jt0+1:jt1) - u_um(:,jt0:jt1-1) - dvg(:,jt0:jt1-1)) * fact ]
+          V_INC= [ (v_um(----"------) - v_um(-----"-----) - dug(----"------)) * fact ]
+          W_INC= [ (w_um(----"------) - w_um(-----"-----)) * fact ]
+          T_INC= [ gradt_um(:,jt0:jt1) ]
+          Q_STAR=[ gradq_um(:,jt0:jt1) ]
+        UI= [u_um(:,jt0)]
+        VI= [v_um(:,jt0)]
+        WI= [w_um(:,jt0)]
+        THETA= [pt_um(:,jt0)]
+        QI= [q_um(:, jt0)]
+        P_IN= [p_um(:, jt0)]
+        LAT= [usrlat]
+        LONG= [usrlon]
+        YEAR_INIT= [year]
+        MONTH_INIT= [month]
+        DAY_INIT= [day]
+        HOUR_INIT= [shour]
+        NMININ= [ int((nfor-1)*dt*60) ]
+        TSTAR_FORCING= [nfor]*288.0
+        Copy everything else
+      Copy everything else
+
+
+
+        
+
+
