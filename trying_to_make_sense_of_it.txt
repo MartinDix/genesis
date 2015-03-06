@@ -37,27 +37,28 @@ Program Genesis
       with the 5th and 6th field it calculates the gradients in X and Y,
       stores them in gradtx/y and gradqx/y
 
-  CALL gradz
-    if omega (=i_int7) >0 and k == 1:
-      dp = 1/2 (lev2 - lev1)
-      dt = temp difference
-      dq = specific humidity difference
-      gradtz = dt/dp
-      gradqz = dq/dp
-    else if omega < 0 and k == 1
-      dp = dt = dq = gradtz = gradqz = 0
-    else if k == k_max
-      opposite of k == 1 (inv omega as well)
-    else:
-      dp = dist. bt. midpoint beneath level and midpoint above level
-      dt and dq equivalent
-      gradtz = dt/dp
-      gradqz = dq/dp
-  gradt = -1*((i_int3 * gradtx) + (i_int4 * gradty) + (i_int7 * gradtz))
-  gradq = -1*((i_int3 * gradqx) + (i_int4 * gradqy) + (i_int7 * gradqz))
-    (note: 	i_int3 is interpolated u, 
-            i_int4 is interpolated v, and
-            i_int7 is interpolated w)
+    CALL gradz
+      if omega (=i_int7) >0 and k == 1:
+        dp = 1/2 (lev2 - lev1)
+        dt = temp difference
+        dq = specific humidity difference
+        gradtz = dt/dp
+        gradqz = dq/dp
+      else if omega < 0 and k == 1
+        dp = dt = dq = gradtz = gradqz = 0
+      else if k == k_max
+        opposite of k == 1 (inv omega as well)
+      else:
+        dp = dist. bt. midpoint beneath level and midpoint above level
+        dt and dq equivalent
+        gradtz = dt/dp
+        gradqz = dq/dp
+
+    gradt = -1*((i_int3 * gradtx) + (i_int4 * gradty) + (i_int7 * gradtz))
+    gradq = -1*((i_int3 * gradqx) + (i_int4 * gradqy) + (i_int7 * gradqz))
+      (note: 	i_int3 is interpolated u, 
+                i_int4 is interpolated v, and
+                i_int7 is interpolated w)
 
   CALL geostr
     pt = t * (100000/levs)^rcp     (with rcp being 287./1004.) (Potential Temperature)
