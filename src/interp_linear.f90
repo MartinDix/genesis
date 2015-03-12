@@ -106,7 +106,14 @@ subroutine interp_linear(nlat,nlon,nlev,nrec,fynindex,fysindex, &
     !         print *,'glr11aA shape2 nlev,nrec',nlev,nrec
     !         print *,'glr11aA shape2',shape(gradt),shape(gradq)
 
-    if (fxeindex(rec).eq.fxwindex(rec))then
+    if((fxeindex(rec).eq.fxwindex(rec)).and.(fynindex(rec).eq.fysindex(rec)))then
+
+      dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)+1),lats(fynindex(rec)),    &
+        &	        lons(fxwindex(rec)))
+      dy(rec) = surfdist(lats(fynindex(rec)+1),lons(fxeindex(rec)),lats(fysindex(rec)),    &
+        &	        lons(fxeindex(rec)))
+
+    elseif (fxeindex(rec).eq.fxwindex(rec))then
 
       dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)+1),lats(fynindex(rec)),    &
         &	        lons(fxwindex(rec)))
@@ -116,13 +123,6 @@ subroutine interp_linear(nlat,nlon,nlev,nrec,fynindex,fysindex, &
     elseif(fynindex(rec).eq.fysindex(rec))then
 
       dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)),lats(fynindex(rec)),    &
-        &	        lons(fxwindex(rec)))
-      dy(rec) = surfdist(lats(fynindex(rec)+1),lons(fxeindex(rec)),lats(fysindex(rec)),    &
-        &	        lons(fxeindex(rec)))
-
-    elseif((fxeindex(rec).eq.fxwindex(rec)).and.(fynindex(rec).eq.fysindex(rec)))then
-
-      dx(rec) = surfdist(lats(fynindex(rec)),lons(fxeindex(rec)+1),lats(fynindex(rec)),    &
         &	        lons(fxwindex(rec)))
       dy(rec) = surfdist(lats(fynindex(rec)+1),lons(fxeindex(rec)),lats(fysindex(rec)),    &
         &	        lons(fxeindex(rec)))
@@ -257,12 +257,12 @@ subroutine interp_linear(nlat,nlon,nlev,nrec,fynindex,fysindex, &
             if (dx(rec).eq.0.)then
               gradtx(k,rec) = 0.0
             else
-              gradtx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 5 = Temp.
+              gradtx(k,rec) = (e_var(k,rec)-w_var(k,rec))/dx(rec)    ! 5 = Temp.
             endif
             if (dy(rec).eq.0.)then
               gradty(k,rec) = 0.0
             else
-              gradty(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+              gradty(k,rec) = (n_var(k,rec)-s_var(k,rec))/dy(rec)
             endif
 
             i_int5(k,rec) = i_var(k,rec)
@@ -272,12 +272,12 @@ subroutine interp_linear(nlat,nlon,nlev,nrec,fynindex,fysindex, &
             if (dx(rec).eq.0.)then
               gradqx(k,rec) = 0.0
             else
-              gradqx(k,rec) = (n_var(k,rec)-s_var(k,rec))/dx(rec)    ! 6 = Spec.H
+              gradqx(k,rec) = (e_var(k,rec)-w_var(k,rec))/dx(rec)    ! 6 = Spec.H
             endif
             if (dy(rec).eq.0.)then
               gradqy(k,rec) = 0.0
             else
-              gradqy(k,rec) = (e_var(k,rec)-w_var(k,rec))/dy(rec)
+              gradqy(k,rec) = (n_var(k,rec)-s_var(k,rec))/dy(rec)
             endif
 
             i_int6(k,rec) = i_var(k,rec)
@@ -297,7 +297,11 @@ subroutine interp_linear(nlat,nlon,nlev,nrec,fynindex,fysindex, &
 
   enddo
 
-  print *,'u,v,w = ',i_int3,i_int4,i_int7
+  !print *,'u,v,w = ',i_int3,i_int4,i_int7
+  do i=1,nlev
+    print *,'u=i_int3 for ilev=',i,nlev,nrec
+    write(6,'(10(E15.6,","))')(i_int3(i,j),j=1,nrec)
+  enddo
 
 
   !----- Insert routine to derive vertical advective tendancy
