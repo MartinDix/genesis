@@ -699,7 +699,7 @@ program genesis
   enddo
 
   !21      format(1(f9.0,' '),2(f8.2),' ',e12.5,' ',3(f8.2))
-  21      format(1(f9.0,' '),2(f9.2),' ',e12.5,' ',3(f8.2))
+  21      format(1(f9.0,' '),3(f9.2),' ',e12.5,' ',3(f8.2))
   close(4)
 
   print *,'Outfile written successfully: charney.scm'
