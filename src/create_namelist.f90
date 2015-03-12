@@ -237,13 +237,42 @@ subroutine create_namelist(nrec,nlev,u_um,dug,v_um,dvg,w_um,t_um,q_um, &
 
       elseif (bfld.eq.'U_INC'.and.u_inc)then
         write(2,*)'U_INC='
-        write(2,'(10(E15.6,","))')(((u_um(k,jt+1) - u_um(k,jt) - dvg(k,jt))*fact, &
-          &                                  jt=jt0,jt1-1),k=1,nlev)            ! - dvg(k,jt))
+        !glr must add in values for last timestep in u and v! thu26feb15
+        ! if set equal to 2nd top level get large winds in top level
+        !          write(2,'(10(E15.6,","))')(((u_um(k,jt+1) - u_um(k,jt) - dvg(k,jt))*fact, &
+          !    &                                  jt=jt0,jt1-1),k=1,nlev)            ! - dvg(k,jt))
+        do k=1,nlev
+          write(2,'(10(E15.6,","))')((u_um(k,jt+1) - u_um(k,jt) - dvg(k,jt))*fact, &
+            &                                  jt=jt0,jt1-1),                              &
+            !    &                                (u_um(k,jt1) - u_um(k,jt-1) - dvg(k,jt-1))*fact
+          &                                (u_um(k,jt1) - u_um(k,jt-1) - dvg(k,jt-1))*fact*0.0
+        enddo
+        do k=1,nlev
+          print *,'klev=k',k,jt0,jt1
+          write(6,'(10(E15.6,","))')((u_um(k,jt+1) - u_um(k,jt) - dvg(k,jt))*fact, &
+            &                                  jt=jt0,jt1-1),                              &
+            &                                (u_um(k,jt1) - u_um(k,jt-1) - dvg(k,jt-1))*fact
+        enddo
         field = .false.
+
       elseif (bfld.eq.'V_INC'.and.v_inc)then
         write(2,*)'V_INC='
-        write(2,'(10(E15.6,","))')(((v_um(k,jt+1) - v_um(k,jt) + dug(k,jt))*fact, &
-          &                                  jt=jt0,jt1-1),k=1,nlev)            ! + dug(k,jt))
+        !glr must add in values for last timestep in u and v! thu26feb15
+        ! if set equal to 2nd top level get large winds in top level
+        !          write(2,'(10(E15.6,","))')(((v_um(k,jt+1) - v_um(k,jt) + dug(k,jt))*fact, &
+          !    &                                  jt=jt0,jt1-1),k=1,nlev)            ! + dug(k,jt))
+        do k=1,nlev
+          write(2,'(10(E15.6,","))')((v_um(k,jt+1) - v_um(k,jt) - dug(k,jt))*fact, &
+            &                                  jt=jt0,jt1-1),                              &
+            !    &                                (v_um(k,jt1) - v_um(k,jt-1) - dug(k,jt-1))*fact
+          &                                (v_um(k,jt1) - v_um(k,jt-1) - dug(k,jt-1))*fact*0.0
+        enddo
+        do k=1,nlev
+          print *,'klev=k',k,jt0,jt1
+          write(6,'(10(E15.6,","))')((v_um(k,jt+1) - v_um(k,jt) - dug(k,jt))*fact, &
+            &                                  jt=jt0,jt1-1),                              &
+            &                                (v_um(k,jt1) - v_um(k,jt-1) - dug(k,jt-1))*fact
+        enddo
         field = .false.
 
       elseif (bfld.eq.'W_INC'.and.w_inc)then 	! vjb 2.4
@@ -275,22 +304,31 @@ subroutine create_namelist(nrec,nlev,u_um,dug,v_um,dvg,w_um,t_um,q_um, &
       field = .false.
 
     elseif(bfld.eq.'WI'.and.wi)then
+      !pre wed25feb15
       write(2,*)'WI='
-      write(2,'(10(E15.6,","))')(w_um(k,jt0),k=1,umlev)
+      !write(2,'(10(E15.6,","))')(w_um(k,jt0),k=1,umlev)
+      write(2,'(10(E15.6,","))')(w_um(k,jt0),k=1,umlev+1)
       field = .false.
 
     elseif(bfld.eq.'THETA'.and.theta)then
       write(2,*)'THETA='
-      write(2,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev+1)
-      write(6,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev+1)
+      !pre wed25feb15
+      !write(2,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev+1)
+      !write(6,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev+1)
+      write(2,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev)
+      write(6,'(10(E15.6,","))')(pt_um(k,jt0),k=1,umlev)
       field = .false.
     elseif(bfld.eq.'QI'.and.qi)then
       write(2,*)'QI='
-      write(2,'(10(E15.6,","))')(q_um(k,jt0),k=1,umlev+1)
+      !pre wed25feb15
+      !write(2,'(10(E15.6,","))')(q_um(k,jt0),k=1,umlev+1)
+      write(2,'(10(E15.6,","))')(q_um(k,jt0),k=1,umlev)
       field = .false.
     elseif(bfld.eq.'P_IN'.and.p_in)then
       write(2,*)'P_IN='
-      write(2,'(10(E15.6,","))')(p_um(k,jt0),k=1,umlev)
+      !pre wed25feb15
+      !write(2,'(10(E15.6,","))')(p_um(k,jt0),k=1,umlev)
+      write(2,'(10(E15.6,","))')(p_um(k,jt0),k=1,umlev+1)
       field = .false.
 
     elseif(bfld.eq.'LAT')then
@@ -312,7 +350,8 @@ subroutine create_namelist(nrec,nlev,u_um,dug,v_um,dvg,w_um,t_um,q_um, &
       write(2,*)'HOUR_INIT=     ',shour,','
       field = .false.
     elseif(bfld.eq.'NMININ')then
-      write(2,*)'NMININ=     ',int((nfor-1)*dt*60),','	! -301=-5hrs1min !glr
+      !write(2,*)'NMININ=     ',int((nfor*dt-1)*60),',' ! -301=-5hrs1min !glr
+      write(2,*)'NMININ=     ',int((nfor-1)*dt*60),',' ! -301=-5hrs1min !glr
       field = .false.
       20       elseif(bfld.eq.'TSTAR_FORCING')then
       ch7 = '*288.0,'
