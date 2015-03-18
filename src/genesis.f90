@@ -27,7 +27,6 @@ program genesis
 
   !        use netcdf
   implicit none
-  include 'netcdf.inc'
 
   !	implicit none
 
@@ -231,7 +230,7 @@ program genesis
   L_w_inOK   = .false. !if we do/do not have w_in,set w_inOK=true/false
   if (debug) print *,'L_w_inOK = ',L_w_inOK
   if (debug) print *,'nfiles,maxfiles = ',nfiles,maxfiles
-  if (nfiles.lt.maxfiles.and.L_w_inOK.ne..false.) stop'Not enough input files specified'
+  if (nfiles.lt.maxfiles.and.(.not. L_w_inOK)) stop'Not enough input files specified'
   if (nfiles.gt.maxfiles) stop'Too many input files specified'
 
 
@@ -333,7 +332,7 @@ program genesis
       q_in = data
 
       if (debug) print *,'q = ',q_in(20,20,10,1)
-      if (L_w_inOK.ne..true.) then
+      if (.not. L_w_inOK) then
         print *,'L_w_inOK',L_w_inOK
         allocate(w_in(NLONS,NLATS,NLVLS,NRECS))           ! vjb 2.3
         w_in = 0.0*q_in
