@@ -38,24 +38,6 @@ default : genesis
 
 $(OBJS) : global.o
 
-#this fails
-#MODDIR = -M/nm/keep/local/intel_builds/netcdf-4.0.1-classic/include
-#LIBDIR = -L/nm/keep/local/intel_builds/netcdf-4.0.1-classic/lib
-#LIBS = -lnetcdf
-#INCDIR = -I/nm/keep/local/intel_builds/netcdf-4.0.1-classic/include
-
-#this fails
-#FC = f95
-#LIBDIR = -L/nm/keep/local/sun_builds/netcdf-4.0.1-classic/lib
-#LIBS = -lnetcdf
-#INCDIR = -I/nm/keep/local/sun_builds/netcdf-4.0.1-classic/include
-
-#OBJS = ngtopt.o global.o ncread_era.o ncread_jra.o ncread_ncep.o \
-#       ncread_um.o establ.o find_latlon.o interp_linear.o \
-#       search_grid.o geostr.o surfdist.o \
-#       radian.o charney_phillips.o create_namelist.o modulus.o \
-#       ncread_dim.o ncread_data.o
-
 genesis: $(OBJS)
 	$(FC) ${FCFLAGS} $(LIBDIR) $(LIBS) $(INCDIR) -o $@ $^
 
