@@ -23,6 +23,7 @@ F90_SOURCES=charney_phillips.f90 genesis.f90 gradz.f90 \
 OBJS=$(F_SOURCES:.f=.o) $(F90_SOURCES:.f90=.o)
 
 default : genesis
+all : genesis
 
 # Clear out the suffixes
 .SUFFIXES:
