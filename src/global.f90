@@ -1,4 +1,3 @@
-
 module global
 
   implicit none
