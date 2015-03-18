@@ -6,57 +6,42 @@
 ######################
 
 FC = ifort
-FCFLAGS = -I/bm/gkeep/ljr/Utils/Intel/include -O3 -xT -ip -no-prec-div -static
+FCFLAGS =-O3 -ip -no-prec-div
 
-LIBDIR = -L/bm/gkeep/ljr/Utils/Intel/lib
-LIBS = -lnetcdf
-INCDIR = -I/bm/gkeep/ljr/Utils/Intel/include
+LIBDIR = -L${NETCDF_ROOT}/lib/Intel
+LIBS = -lnetcdff -lnetcdf
+INCDIR = -I${NETCDF_ROOT}/include/Intel
 
-#this fails
-#MODDIR = -M/nm/keep/local/intel_builds/netcdf-4.0.1-classic/include
-#LIBDIR = -L/nm/keep/local/intel_builds/netcdf-4.0.1-classic/lib
-#LIBS = -lnetcdf
-#INCDIR = -I/nm/keep/local/intel_builds/netcdf-4.0.1-classic/include
 
-#this fails
-#FC = f95
-#LIBDIR = -L/nm/keep/local/sun_builds/netcdf-4.0.1-classic/lib
-#LIBS = -lnetcdf
-#INCDIR = -I/nm/keep/local/sun_builds/netcdf-4.0.1-classic/include
+F_SOURCES=establ.f  ngtopt.f
+F90_SOURCES=charney_phillips.f90 genesis.f90 gradz.f90 \
+            ncread_data.f90 radian.f90 slingo.f90      \
+	    create_namelist.f90 geostr.f90 interp_linear.f90 \
+	    ncread_dim.f90 relh2q.f90 surfdist.f90 find_latlon.f90 \
+	    global.f90 modulus.f90 q2relh.f90 search_grid.f90
 
-OBJS = ngtopt.o global.o \
-       establ.o find_latlon.o interp_linear.o \
-       search_grid.o geostr.o surfdist.o \
-       radian.o charney_phillips.o create_namelist.o modulus.o \
-       ncread_dim.o ncread_data.o gradz.o relh2q.o q2relh.o slingo.o
-#OBJS = ngtopt.o global.o ncread_era.o ncread_jra.o ncread_ncep.o \
-#       ncread_um.o establ.o find_latlon.o interp_linear.o \
-#       search_grid.o geostr.o surfdist.o \
-#       radian.o charney_phillips.o create_namelist.o modulus.o \
-#       ncread_dim.o ncread_data.o
+OBJS=$(F_SOURCES:.f=.o) $(F90_SOURCES:.f90=.o)
 
-OUTPUT = genesis
+default : genesis
 
-genesis:
-	$(FC) -c ${FCFLAGS} *.f
-	$(FC) -c ${FCFLAGS} global.f90
-	$(FC) -c ${FCFLAGS} modulus.f90
-	$(FC) -c ${FCFLAGS} *.f90 $(LIBDIR) $(LIBS) $(INCDIR)
-	$(FC) -c ${FCFLAGS} relh2q.f90 establ.o
-	$(FC) -c ${FCFLAGS} q2relh.f90 establ.o
-	$(FC) -c ${FCFLAGS} search_grid.f90 modulus.o
-	$(FC) -c ${FCFLAGS} find_latlon.f90 search_grid.o
-	$(FC) -c ${FCFLAGS} interp_linear.f90 search_grid.o gradz.o
-	$(FC) -c ${FCFLAGS} geostr.f90
-	$(FC) -c ${FCFLAGS} surfdist.f90
-	$(FC) -c ${FCFLAGS} radian.f90
-	$(FC) -c ${FCFLAGS} charney_phillips.f90 q2relh.o slingo.o
-	$(FC) -c ${FCFLAGS} create_namelist.f90
-	sleep 5
-	$(FC) genesis.f90 -o $(OUTPUT) ${FCFLAGS} $(OBJS) $(LIBDIR) $(LIBS) $(INCDIR)
+# Clear out the suffixes
+.SUFFIXES:
 
-all: 
-	make genesis
+# List only suffixes we use
+.SUFFIXES: .o .f .f90
+
+.f.o:
+	$(FC) -c $(FCFLAGS) $(LIBDIR) $(INCDIR) $(LIBS) -o $@ $<
+
+.f90.o:
+	$(FC) -c $(FCFLAGS) $(LIBDIR) $(INCDIR) $(LIBS) -o $@ $<
+
+$(OBJS) : global.o
+
+genesis: $(OBJS)
+	$(FC) ${FCFLAGS} $(LIBDIR) $(LIBS) $(INCDIR) -o $@ $^
+
+all: genesis
 
 clean:
 	rm -f $(OBJS) genesis.o *.o *.mod
@@ -64,7 +49,8 @@ clean:
 new:
 	make clean
 	make genesis
-	make clean
+
+.PHONY: all clean new default
 
 ###################
 # END
