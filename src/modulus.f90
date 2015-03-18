@@ -1,15 +1,15 @@
 !------------------------------------------------------------
 !
-	real function modulus(dd)
+real function modulus(dd)
 	
-	implicit none
+    implicit none
 	
-	real,intent(in)		:: dd
+    real,intent(in)		:: dd
 	
-	modulus = sqrt(dd**2)
+    modulus = sqrt(dd**2)
 	
-	return
+    return
 	
-	end function modulus
+end function modulus
 	
 	
