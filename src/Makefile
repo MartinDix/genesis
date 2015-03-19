@@ -31,6 +31,9 @@ default : genesis
 # List only suffixes we use
 .SUFFIXES: .o .f .f90
 
+ncread_dim.o ncread_data.o genesis.o : netcdf_type.o
+ncread_dim.o ncread_data.o : netcdf_check.o
+
 .f.o:
 	$(FC) -c $(FCFLAGS) $(LIBDIR) $(INCDIR) $(LIBS) -o $@ $<
 
