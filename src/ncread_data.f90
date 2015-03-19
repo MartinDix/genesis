@@ -1,5 +1,5 @@
 subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
-  &                          lon,lat,lev,rec,dat)
+  &                          lon,lat,lev,rec,dat, varid, var_dimids)
 
   !  fills arrays according to NetCDF dimensions
   !  - vjb 20/8/09
@@ -19,6 +19,9 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   integer,intent(in)  :: nlat
   integer,intent(in)  :: nlev
   integer,intent(in)  :: nrec
+
+  integer, intent(in) :: varid
+  integer, dimension(4), intent(in) :: var_dimids
 
   real,dimension(nlon),intent(inout)  :: lon
   real,dimension(nlat),intent(inout)  :: lat
@@ -43,77 +46,26 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   print *,'ncread_data: shape(dat) = ',shape(dat)
 
+  rec_varid = var_dimids(1)
+  lvl_varid = var_dimids(2)
+  lat_varid = var_dimids(3)
+  lon_varid = var_dimids(4)
+  dat_varid = varid
 
-  if (nvar.eq.4)then
+  dd = (nvar == 4)
 
-    dd = .true.
-    if (dd) print *,'ncread_data: reduced dimension flag raised'
-    do i=1,nvar
-      call check(nf_inq_varname(ncid,i,name))
-      var(i) = name
-      print *,'var = ',var(i)
-
-      if (i.eq.1)then
-        call check(nf_inq_varid(ncid,var(i),lon_varid))
-        call check(nf_get_var_real(ncid,lon_varid,lon))
-
-      elseif (i.eq.2)then
-        call check(nf_inq_varid(ncid,var(i),lat_varid))
-        call check(nf_get_var_real(ncid,lat_varid,lat))
-
-      elseif (i.eq.3)then
-        call check(nf_inq_varid(ncid,var(i),rec_varid))
-        call check(nf_get_var_real(ncid,rec_varid,rec))
-
-      elseif (i.eq.4)then
-        call check(nf_inq_varid(ncid,var(i),dat_varid))
-        call check(nf_get_var_real(ncid,dat_varid,dat))
-
-      endif
-
-      lev = 1000.0
-
-      print *,'read_data iteration = ',i
-
-    enddo
-
+  call check(nf_get_var_real(ncid,lon_varid,lon))
+  call check(nf_get_var_real(ncid,lat_varid,lat))
+  call check(nf_get_var_real(ncid,rec_varid,rec))
+  if (.not. dd) then
+    call check(nf_get_var_real(ncid,lvl_varid,lev))
   else
+    lev = 1000.0
+  end if
 
-    do i=1,nvar
-      call check(nf_inq_varname(ncid,i,name))
-      var(i) = name
-      print *,'var = ',var(i)
-
-      if (i.eq.1)then
-        call check(nf_inq_varid(ncid,var(i),lon_varid))
-        call check(nf_get_var_real(ncid,lon_varid,lon))
-
-      elseif (i.eq.2)then
-        call check(nf_inq_varid(ncid,var(i),lat_varid))
-        call check(nf_get_var_real(ncid,lat_varid,lat))
-
-      elseif (i.eq.3)then
-        call check(nf_inq_varid(ncid,var(i),lvl_varid))
-        call check(nf_get_var_real(ncid,lvl_varid,lev))
-
-      elseif (i.eq.4)then
-        call check(nf_inq_varid(ncid,var(i),rec_varid))
-        call check(nf_get_var_real(ncid,rec_varid,rec))
-
-      elseif (i.eq.5)then
-        call check(nf_inq_varid(ncid,var(i),dat_varid))
-        call check(nf_get_var_real(ncid,dat_varid,dat))
-
-      endif
-
-      print *,'read_data iteration = ',i
-
-    enddo
-
-  endif
+  call check(nf_get_var_real(ncid,dat_varid,dat))
 
   call check(nf_close(ncid))
-
 
   return
 
@@ -131,7 +83,4 @@ contains
     end if
   end subroutine check
 
-
 end subroutine ncread_data
-
-

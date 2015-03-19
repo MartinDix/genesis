@@ -1,5 +1,5 @@
 subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
-  &                       debug,infile)
+  &                       debug,infile, varid, var_dimids)
 
   !  First read of NetCDF to get array dimensions
   !  - vjb 23/4/09
@@ -34,7 +34,15 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   integer  :: lon_varid
   integer  :: lvl_varid
   integer  :: rec_varid
-  integer  :: dat_varid
+  
+
+  CHARACTER(len=NF_MAX_NAME), DIMENSION(:), ALLOCATABLE :: dim_names
+  CHARACTER(len=NF_MAX_NAME), DIMENSION(:), ALLOCATABLE :: var_names
+  integer :: i, j
+  integer, intent(out) :: varid
+  integer :: var_ndims
+  integer, dimension(4), intent(out) ::var_dimids
+  logical :: is_dim
 
   logical  :: dd
 
@@ -49,20 +57,66 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   call check(nf_inq(ncid,ndim,nvar,nattr,unlimdimid))
 
+  if ((nvar - ndim) <= 0) stop "No Variables found"
+  if ((nvar - ndim) > 1) then
+    print *, "WARNING, multiple variables possible"
+  end if
+
   print *,'nvar',nvar
 
-  lon_varid = 1
-  lat_varid = 2
-  if (nvar.eq.4)then
-    rec_varid = 3  ! problem with ncid
-    dat_varid = 4
-  elseif(nvar.eq.5)then
-    lvl_varid = 3
-    rec_varid = 4
-    dat_varid = 5
-  else
-    stop 'ERROR: nvar dimension outside acceptable threshold'
-  endif
+  allocate(dim_names(ndim))
+  allocate(var_names(nvar))
+
+  dimnames_loop: do i = 1, ndim
+    call check(nf_inq_dimname(ncid, i, dim_names(i)))
+  end do dimnames_loop
+
+  varnames_loop: do i = 1, nvar
+    call check(nf_inq_varname(ncid, i, var_names(i)))
+  end do varnames_loop
+
+  varid = -1000
+  write(*, 101) 'S', 'Name', '#dims'
+  select_var_loop: do i = 1, nvar
+    is_dim = .FALSE.
+    do j = 1, ndim
+      if (var_names(i) == dim_names(j)) is_dim = .TRUE.
+    end do
+    if (is_dim) then
+      write(*, 101) ' ', var_names(i), 'Dim'
+    else
+      call check(nf_inq_varndims(ncid, i, var_ndims))
+      if ((varid < 0) .and. (var_ndims >= 3) .and. (var_ndims <= 4)) then
+        write(*, 100) '*', var_names(i), var_ndims
+        varid = i
+      else
+        write(*, 100) ' ', var_names(i), var_ndims
+      end if
+    end if ! is_dim
+  end do select_var_loop
+100 FORMAT(1X, A1, 1X, A25, 1X, I4) ! For vars
+101 FORMAT(1X, A1, 1X, A25, 1X, A4) ! For header and dims
+
+  if (varid < 0) stop "ERROR: NO VARIABLE FOUND"
+
+  call check(nf_inq_varndims(ncid, varid, var_ndims))
+  call check(nf_inq_dimid(ncid, varid, var_dimids))
+
+  dd = (var_ndims == 3)
+  if (dd) then
+    var_dimids(4) = var_dimids(3)
+    var_dimids(3) = -1000
+  end if
+  rec_varid = var_dimids(1)
+  lvl_varid = var_dimids(2)
+  lat_varid = var_dimids(3)
+  lon_varid = var_dimids(4)
+
+  print *, 'assuming the following dimensions:'
+  print *, 'lon: ' // trim(dim_names(lon_varid))
+  print *, 'lat: ' // trim(dim_names(lat_varid))
+  if (.not. dd) print *, 'lvl: ' // trim(dim_names(lvl_varid))
+  print *, 'rec: ' // trim(dim_names(rec_varid))
 
   if (debug) print*,'..1..'
 
@@ -88,9 +142,10 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   !
   print *,"**** Successfully read input file: ",infile
 
+  ! For compatibility:
+  nvar = var_ndims + 1
+
   return
-
-
   !------ Subroutines ------
   !  NetCDF function
 

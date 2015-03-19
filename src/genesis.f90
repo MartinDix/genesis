@@ -140,6 +140,8 @@ program genesis
   integer,dimension(:),allocatable  :: frcxeindex
   integer,dimension(:),allocatable  :: frcxwindex
   integer  :: nfrc
+  integer, dimension(num) :: varid
+  integer, dimension(4, num) :: var_dimids
 
 
   !-------------------- Command line setup ------------------
@@ -255,7 +257,8 @@ program genesis
       deallocate(data)
     endif
 
-    call ncread_dim(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,debug,infile(k))
+    call ncread_dim(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,debug,infile(k), varid(k), &
+    & var_dimids(:, k))
 
     allocate(lons(NLONS))
     allocate(lats(NLATS))
@@ -265,7 +268,8 @@ program genesis
 
     if (debug) print *,'nlon,nlat,nlev,nrec = ',NLONS,NLATS,NLVLS,NRECS
 
-    call ncread_data(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,lons,lats,levs,rec,data)
+    call ncread_data(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,lons,lats,levs,rec,data, &
+    &   varid(k), var_dimids(:, k))
 
     if (k.eq.1)then
 
