@@ -4,7 +4,7 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   !  fills arrays according to NetCDF dimensions
   !  - vjb 20/8/09
 
-  use global
+  use netcdf_check, only: check
 
   !        use netcdf
   implicit none
@@ -34,7 +34,7 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   integer  :: rec_varid
   integer  :: dat_varid
 
-  logical                                         :: dd
+  logical  :: dd
 
   print *,'ncread_data: shape(dat) = ',shape(dat)
 
@@ -63,16 +63,5 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   !------ Subroutines ------
   !  NetCDF function
-
-contains
-
-  subroutine check(status)
-    integer, intent ( in) :: status
-
-    if(status /= nf_noerr) then
-      print *, trim(nf_strerror(status))
-      stop "Stopped"
-    end if
-  end subroutine check
 
 end subroutine ncread_data

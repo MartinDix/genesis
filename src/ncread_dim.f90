@@ -5,6 +5,7 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   !  - vjb 23/4/09
 
   use global, only: num
+  use netcdf_check, only: check
 
   !        use netcdf
   implicit none
@@ -150,16 +151,6 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   !  NetCDF function
 
 contains
-
-  subroutine check(status)
-    integer, intent ( in) :: status
-
-    if(status /= nf_noerr) then
-      print *, trim(nf_strerror(status))
-      stop "Stopped"
-    end if
-  end subroutine check
-
   !-------------------------------------------
   !  flip 1d array in vertical
 
