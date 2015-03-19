@@ -103,7 +103,7 @@ subroutine ncread_dim(nc_meta, debug, infile)
   nc_meta%lon_dimid = var_dimids(1)
   do j = 1, nvar
     if (var_names(j) == dim_names(nc_meta%rec_dimid)) nc_meta%rec_varid = j
-    if (var_names(j) == dim_names(nc_meta%lvl_dimid)) nc_meta%lvl_varid = j
+    if (.not. dd) if (var_names(j) == dim_names(nc_meta%lvl_dimid)) nc_meta%lvl_varid = j
     if (var_names(j) == dim_names(nc_meta%lon_dimid)) nc_meta%lon_varid = j
     if (var_names(j) == dim_names(nc_meta%lat_dimid)) nc_meta%lat_varid = j
   end do
