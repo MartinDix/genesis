@@ -20,7 +20,7 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   integer,intent(out)  :: nlev  ! arrays 2
   integer,intent(out)  :: nrec  !
 
-  integer  :: i,m  ! counters
+  integer  :: m  ! counters
 
   !------ NetCDF I/O
   !
@@ -35,10 +35,6 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   integer  :: lvl_varid
   integer  :: rec_varid
   integer  :: dat_varid
-
-  character (len = nf_max_name)  :: name
-  character*20  :: var(num)
-  integer  :: length(num)
 
   logical  :: dd
 
@@ -55,183 +51,126 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   print *,'nvar',nvar
 
+  lon_varid = 1
+  lat_varid = 2
   if (nvar.eq.4)then
-    do i=1,nvar
-      dd = .true.
-      if (dd) print *,'ncread_dim:  reduced dimension flag raised'
-      call check(nf_inq_varname(ncid,i,name))
-      var(i) = trim(name)
-      print *,'var = ',var(i)
-      if (i.eq.1) call check(nf_inq_varid(ncid,var(i),lon_varid))
-      if (i.eq.2) call check(nf_inq_varid(ncid,var(i),lat_varid))
-      if (i.eq.3) call check(nf_inq_varid(ncid,var(i),rec_varid))  ! problem with ncid
-      if (i.eq.4) call check(nf_inq_varid(ncid,var(i),dat_varid))
-    enddo
-
-    !          var(4) = var(3)
-    !          var(5) = var(4)
-    !          var(3) = "lvl"
-
+    rec_varid = 3  ! problem with ncid
+    dat_varid = 4
   elseif(nvar.eq.5)then
-
-    do i=1,nvar
-      call check(nf_inq_varname(ncid,i,name))
-      var(i) = trim(name)
-      print *,'var = ',var(i)
-      if (i.eq.1) call check(nf_inq_varid(ncid,var(i),lon_varid))
-      if (i.eq.2) call check(nf_inq_varid(ncid,var(i),lat_varid))
-      if (i.eq.3) call check(nf_inq_varid(ncid,var(i),lvl_varid))
-      if (i.eq.4) call check(nf_inq_varid(ncid,var(i),rec_varid))
-      if (i.eq.5) call check(nf_inq_varid(ncid,var(i),dat_varid))
-    enddo
-
+    lvl_varid = 3
+    rec_varid = 4
+    dat_varid = 5
   else
+    stop 'ERROR: nvar dimension outside acceptable threshold'
+  endif
 
-    stop'ERROR: nvar dimension outside acceptable threshold'
+  if (debug) print*,'..1..'
 
-    endif
+  call check(nf_inq_dimlen(ncid, lon_varid, nlon))
+  call check(nf_inq_dimlen(ncid, lat_varid, nlat))
+  if (dd)then ! Reduced dimensions
+    nlev = 1
+  else
+    call check(nf_inq_dimlen(ncid, lvl_varid, nlev))
+  endif
+  call check(nf_inq_dimlen(ncid, rec_varid, nrec))
 
-    if (debug) print*,'..1..'
+  if (debug) print*,'..2..'
 
-    if (dd)then
+  print *,'nlon = ',nlon
+  print *,'nlat = ',nlat
+  print *,'nlev = ',nlev
+  print *,'nrec = ',nrec
 
-      do i=1,nvar
-        if (i.eq.1) call check(nf_inq_dim(ncid,lon_varid,  &
-          &                           var(i),length(i)))
-        if (i.eq.2) call check(nf_inq_dim(ncid,lat_varid,  &
-          &                           var(i),length(i)))
-        !         if (i.eq.3) length(i) = 1
+  dd = .false.
 
-        if (i.eq.3)then
-          call check(nf_inq_dim(ncid,rec_varid,var(i),length(i)))
-          var(i+1) = var(i)                    ! rearrange data dimensions
-          var(i) = "lvl"                       ! to standardise format
-          length(i+1) = length(i)
-          length(i) = 1
-        endif
+  !------- return
+  !
+  print *,"**** Successfully read input file: ",infile
 
-        if (debug) print *,'var,length = ',var(i),length(i)
-      enddo
-
-    else
-
-      do i=1,nvar-1
-        if (i.eq.1) call check(nf_inq_dim(ncid,lon_varid,  &
-          &                           var(i),length(i)))
-        if (i.eq.2) call check(nf_inq_dim(ncid,lat_varid,  &
-          &                           var(i),length(i)))
-        if (i.eq.3) call check(nf_inq_dim(ncid,lvl_varid,  &
-          &                           var(i),length(i)))
-        if (i.eq.4) call check(nf_inq_dim(ncid,rec_varid,  &
-          &                           var(i),length(i)))
-        if (debug) print *,'var,length = ',var(i),length(i)
-      enddo
-
-    endif
-
-    if (debug) print*,'..2..'
-
-    nlon = length(1)
-    print *,'nlon = ',nlon
-    nlat = length(2)
-    print *,'nlat = ',nlat
-    nlev = length(3)
-    print *,'nlev = ',nlev
-    nrec = length(4)
-    print *,'nrec = ',nrec
-
-    dd = .false.
+  return
 
 
-    !------- return
-    !
-    print *,"**** Successfully read input file: ",infile
+  !------ Subroutines ------
+  !  NetCDF function
+
+contains
+
+  subroutine check(status)
+    integer, intent ( in) :: status
+
+    if(status /= nf_noerr) then
+      print *, trim(nf_strerror(status))
+      stop "Stopped"
+    end if
+  end subroutine check
+
+  !-------------------------------------------
+  !  flip 1d array in vertical
+
+  !  subroutine arrswapk(nx,ny,nz,nrec,infld)
+  subroutine arrswapk(nz,infld)
+
+    integer nz
+    !  real, intent(inout)  :: infld(nx,ny,nz,nrec)
+    real, intent(inout)  :: infld(nz)
+    real  :: outfld(nz)
+
+    integer k
+    integer kinv
+      
+
+
+    do k=1,nz
+      kinv = nz+1 - k
+      outfld(k) = infld(kinv)
+    enddo
+    do k=1,nz
+      infld(k) = outfld(k)
+    enddo
 
     return
 
+  end subroutine arrswapk
 
-    !------ Subroutines ------
-    !  NetCDF function
+  !----------------------------------------------
+  !  flip 3d array in vertical - repeat for nrecs
 
-  contains
+  subroutine arrswap3dk(nx,ny,nz,nrec,infld)
 
-    subroutine check(status)
-      integer, intent ( in) :: status
+    integer   :: nx,ny,nz,nrec
+    real, intent(inout)  :: infld(nx,ny,nz,nrec)
+    real  :: outfld(nx,ny,nz,nrec)
 
-      if(status /= nf_noerr) then
-        print *, trim(nf_strerror(status))
-        stop "Stopped"
-      end if
-    end subroutine check
-
-    !-------------------------------------------
-    !  flip 1d array in vertical
-
-    !  subroutine arrswapk(nx,ny,nz,nrec,infld)
-    subroutine arrswapk(nz,infld)
-
-      integer nz
-      !  real, intent(inout)  :: infld(nx,ny,nz,nrec)
-      real, intent(inout)  :: infld(nz)
-      real  :: outfld(nz)
-
-      integer k
-      integer kinv
+    integer  :: j,k,l
+    integer  :: kinv
       
 
-
+    do j=1,nrec
       do k=1,nz
         kinv = nz+1 - k
-        outfld(k) = infld(kinv)
+        do l=1,ny
+          do m=1,nx
+            outfld(m,l,k,j) = infld(m,l,kinv,j)
+          enddo
+        enddo
       enddo
+    enddo
+
+    do j=1,nrec
       do k=1,nz
-        infld(k) = outfld(k)
-      enddo
-
-      return
-
-    end subroutine arrswapk
-
-    !----------------------------------------------
-    !  flip 3d array in vertical - repeat for nrecs
-
-    subroutine arrswap3dk(nx,ny,nz,nrec,infld)
-
-      integer   :: nx,ny,nz,nrec
-      real, intent(inout)  :: infld(nx,ny,nz,nrec)
-      real  :: outfld(nx,ny,nz,nrec)
-
-      integer  :: j,k,l
-      integer  :: kinv
-      
-
-      do j=1,nrec
-        do k=1,nz
-          kinv = nz+1 - k
-          do l=1,ny
-            do m=1,nx
-              outfld(m,l,k,j) = infld(m,l,kinv,j)
-            enddo
+        do l=1,ny
+          do m=1,nx
+            infld(m,l,k,j) = outfld(m,l,k,j)
           enddo
         enddo
       enddo
+    enddo
 
-      do j=1,nrec
-        do k=1,nz
-          do l=1,ny
-            do m=1,nx
-              infld(m,l,k,j) = outfld(m,l,k,j)
-            enddo
-          enddo
-        enddo
-      enddo
+    return
 
-      return
+  end subroutine arrswap3dk
 
-    end subroutine arrswap3dk
+  !------------------------------------------
 
-    !------------------------------------------
-
-  end subroutine ncread_dim
-
-
+end subroutine ncread_dim
