@@ -24,6 +24,7 @@ program genesis
 
 
   use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
+  use netcdf_type
 
   implicit none
 
@@ -74,10 +75,8 @@ program genesis
   !-----------------------------
   !  NetCDF settings
   !
-  integer  :: ncid
-  integer  :: nvar
-  
-  
+
+  type(netcdf_metadata) :: nc_meta
   integer  :: NRECS,NLVLS,NLONS,NLATS
 
   character*8  :: chymd(max_nrecs)  ! user def. date
@@ -257,8 +256,13 @@ program genesis
       deallocate(data)
     endif
 
-    call ncread_dim(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,debug,infile(k), varid(k), &
+    call ncread_dim(nc_meta,debug,infile(k), varid(k), &
     & var_dimids(:, k))
+
+    NLONS = nc_meta%lon_n
+    NLATS = nc_meta%lat_n
+    NLVLS = nc_meta%lvl_n
+    NRECS = nc_meta%rec_n
 
     allocate(lons(NLONS))
     allocate(lats(NLATS))
@@ -268,8 +272,8 @@ program genesis
 
     if (debug) print *,'nlon,nlat,nlev,nrec = ',NLONS,NLATS,NLVLS,NRECS
 
-    call ncread_data(ncid,nvar,NLONS,NLATS,NLVLS,NRECS,lons,lats,levs,rec,data, &
-    &   varid(k), var_dimids(:, k))
+    call ncread_data(nc_meta,lons,lats,levs,rec,data, &
+    &   var_dimids(:, k))
 
     if (k.eq.1)then
 
