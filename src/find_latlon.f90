@@ -42,14 +42,14 @@ subroutine find_latlon(nrecs,nlat,nlon,finlat,finlon,lat,lon,fynindex,fysindex, 
     !  print *,'inlat=',inlat
     !  print *,'lat=',lat
     !  print *,'nlat=',nlat
-    call search_grid(inlat,lat,nlat,positive,ynindex,debug)
+    call search_grid(inlat,lat,nlat,positive,ynindex)
     !  if (debug) print *,'ynindex,inlat,lat(ynindex) = ',ynindex,inlat,lat(ynindex)
 
     !------------------------------------------------------------
     !  Now, do the same in southerly direction to get nearest south latitude
 
     positive = .false.
-    call search_grid(inlat,lat,nlat,positive,ysindex,debug)
+    call search_grid(inlat,lat,nlat,positive,ysindex)
     !  if (debug) print *,'ysindex,inlat,lat(ysindex) = ',ysindex,inlat,lat(ysindex)
 
 
@@ -57,7 +57,7 @@ subroutine find_latlon(nrecs,nlat,nlon,finlat,finlon,lat,lon,fynindex,fysindex, 
     !  Once again, now scanning west to east...
 
     positive = .true.
-    call search_grid(inlon,lon,nlon,positive,xeindex,debug)
+    call search_grid(inlon,lon,nlon,positive,xeindex)
     !  if (debug) print *,'xeindex,inlon,lon(xeindex) = ',xeindex,inlon,lon(xeindex)
 
 
@@ -65,7 +65,7 @@ subroutine find_latlon(nrecs,nlat,nlon,finlat,finlon,lat,lon,fynindex,fysindex, 
     !  Finally, scan east to west...
 
     positive = .false.
-    call search_grid(inlon,lon,nlon,positive,xwindex,debug)
+    call search_grid(inlon,lon,nlon,positive,xwindex)
     !  if (debug) print *,'xwindex,inlon,lon(xwindex) = ',xwindex,inlon,lon(xwindex)
 
 

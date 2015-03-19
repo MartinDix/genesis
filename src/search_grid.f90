@@ -1,4 +1,4 @@
-subroutine search_grid(usrpt,dat,max,positive,index,debug)
+subroutine search_grid(usrpt,dat,max_array_size,positive,index)
 
   !	Given a grid point (usrpt), will find nearest neighbour in dat array.
   !	Choose positive = .true. to search 'up' and .false. to search 'down'.
@@ -8,12 +8,11 @@ subroutine search_grid(usrpt,dat,max,positive,index,debug)
   !------- declarations
 
   real,parameter  :: acc = 0.007 ! accuracy of real number search
-  integer         :: max ! size of destination array
+  integer         :: max_array_size ! size of destination array
   real,intent(in) :: usrpt ! user defined grid point (f5.1)
-  real,dimension(max),intent(in)  :: dat ! destination grid array
+  real,dimension(max_array_size),intent(in)  :: dat ! destination grid array
   logical     :: positive ! search up or down (+/-)
   integer,intent(out)             :: index ! output grid index
-  logical     :: debug ! debug option
   real        :: dd,delta,degsearch,gacc
   integer     :: mmax
 
@@ -35,7 +34,7 @@ subroutine search_grid(usrpt,dat,max,positive,index,debug)
 
     gridpt = usrpt        ! initialise
     up_loop: do m=1,mmax           ! search 'up' 5 deg in steps of 0.01
-      do n=1,max
+      do n=1,max_array_size
         dd = gridpt-dat(n)
         if (abs(dd).le.gacc)then
           exit up_loop
@@ -50,7 +49,7 @@ subroutine search_grid(usrpt,dat,max,positive,index,debug)
 
     gridpt = usrpt
     down_loop: do m=1,mmax
-      do n=max,1,-1
+      do n=max_array_size,1,-1
         dd = gridpt-dat(n)
         if (abs(dd).le.gacc)then
           exit down_loop
