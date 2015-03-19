@@ -23,9 +23,8 @@ program genesis
   !                                       - vjb 9/11/2010
 
 
-  use global
+  use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
 
-  !        use netcdf
   implicit none
 
   !  implicit none
@@ -81,7 +80,7 @@ program genesis
   
   integer  :: NRECS,NLVLS,NLONS,NLATS
 
-  character*8  :: chymd(max)  ! user def. date
+  character*8  :: chymd(max_nrecs)  ! user def. date
 
   !-----------------------------
   !  Data arrays
@@ -382,7 +381,7 @@ program genesis
 
     open(1,file='lonlat.dat')
 
-    do i=1,max  ! Next, check to make sure
+    do i=1,max_nrecs  ! Next, check to make sure
       read(1,*,end=998)chymd(i)  ! the user-defined lonlat file
     enddo  ! matches the number of records
 
@@ -551,7 +550,7 @@ program genesis
 
     open(1,file='dates.dat')
 
-    do i=1,max  ! Next, check to make sure
+    do i=1,max_nrecs  ! Next, check to make sure
       read(1,*,end=999)chymd(i)  ! the user-defined dates file
     enddo  ! matches the number of records
   ! in the NetCDF file - and
