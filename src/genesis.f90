@@ -230,7 +230,7 @@ program genesis
   L_w_inOK   = .false. !if we do/do not have w_in,set w_inOK=true/false
   if (debug) print *,'L_w_inOK = ',L_w_inOK
   if (debug) print *,'nfiles,maxfiles = ',nfiles,maxfiles
-  if (nfiles.lt.maxfiles.and.(.not. L_w_inOK)) stop'Not enough input files specified'
+  if (nfiles.lt.maxfiles.and.(L_w_inOK)) stop'Not enough input files specified'
   if (nfiles.gt.maxfiles) stop'Too many input files specified'
 
 
