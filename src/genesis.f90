@@ -22,7 +22,6 @@ program genesis
   !       Upgrade to use generic NetCDF read routines (from diurnal2d)
   !                                       - vjb 9/11/2010
 
-
   use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
   use netcdf_type
 
@@ -46,7 +45,6 @@ program genesis
   logical  :: there
   logical  :: L_vlatlon
   logical  :: L_w_inOK
-
 
   !------------------------------
   !  More command line parameters
@@ -85,7 +83,6 @@ program genesis
   !  Data arrays
 
   real,dimension(:,:,:,:),allocatable  :: data
-  
 
   real,dimension(:),allocatable  :: rec
 
@@ -139,9 +136,6 @@ program genesis
   integer,dimension(:),allocatable  :: frcxeindex
   integer,dimension(:),allocatable  :: frcxwindex
   integer  :: nfrc
-  integer, dimension(num) :: varid
-  integer, dimension(4, num) :: var_dimids
-
 
   !-------------------- Command line setup ------------------
   !  Usage options
@@ -256,8 +250,7 @@ program genesis
       deallocate(data)
     endif
 
-    call ncread_dim(nc_meta,debug,infile(k), varid(k), &
-    & var_dimids(:, k))
+    call ncread_dim(nc_meta,debug,infile(k))
 
     NLONS = nc_meta%lon_n
     NLATS = nc_meta%lat_n
@@ -272,8 +265,7 @@ program genesis
 
     if (debug) print *,'nlon,nlat,nlev,nrec = ',NLONS,NLATS,NLVLS,NRECS
 
-    call ncread_data(nc_meta,lons,lats,levs,rec,data, &
-    &   var_dimids(:, k))
+    call ncread_data(nc_meta,lons,lats,levs,rec,data)
 
     if (k.eq.1)then
 
