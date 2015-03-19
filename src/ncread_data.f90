@@ -51,12 +51,6 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   dd = (lvl_varid < 0)
 
-  print *, 'dimids, varid, whether it is reduced'
-  write(*, *) var_dimids, varid, dd
-
-  print *, 'nlat, nlon, nlev, nrec'
-  print *, nlat, nlon, nlev, nrec
-
   call check(nf_get_var_real(ncid,lon_varid,lon))
   call check(nf_get_var_real(ncid,lat_varid,lat))
   call check(nf_get_var_real(ncid,rec_varid,rec))
