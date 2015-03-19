@@ -9,8 +9,6 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   !        use netcdf
   implicit none
   include 'netcdf.inc'
-
-  
   
   integer,intent(in)  :: ncid
   integer,intent(in)  :: nvar
@@ -29,9 +27,6 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   real,dimension(nrec),intent(inout)  :: rec
 
   real,dimension(nlon,nlat,nlev,nrec),intent(inout)  :: dat
-
-  
-  
 
   integer  :: lat_varid
   integer  :: lon_varid
