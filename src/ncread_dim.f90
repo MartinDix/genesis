@@ -105,13 +105,12 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   dd = (var_ndims == 3)
   if (dd) then
     var_dimids(4) = var_dimids(3)
-    var_dimids(3) = var_dimids(2)
-    var_dimids(2) = -1000
+    var_dimids(3) = -1000
   end if
-  rec_varid = var_dimids(1)
-  lvl_varid = var_dimids(2)
-  lat_varid = var_dimids(3)
-  lon_varid = var_dimids(4)
+  rec_varid = var_dimids(4)
+  lvl_varid = var_dimids(3)
+  lat_varid = var_dimids(2)
+  lon_varid = var_dimids(1)
 
   print *, 'assuming the following dimensions:'
   print *, 'lon: ' // trim(dim_names(lon_varid))

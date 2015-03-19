@@ -10,7 +10,7 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   implicit none
   include 'netcdf.inc'
 
-  integer  :: i
+  
   
   integer,intent(in)  :: ncid
   integer,intent(in)  :: nvar
@@ -30,8 +30,8 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   real,dimension(nlon,nlat,nlev,nrec),intent(inout)  :: dat
 
-  character*20  :: var(num)
-  character*20  :: name
+  
+  
 
   integer  :: lat_varid
   integer  :: lon_varid
@@ -41,20 +41,21 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
 
   logical                                         :: dd
 
-
-  dd = .false.
-
   print *,'ncread_data: shape(dat) = ',shape(dat)
 
-  rec_varid = var_dimids(1)
-  lvl_varid = var_dimids(2)
-  lat_varid = var_dimids(3)
-  lon_varid = var_dimids(4)
+  rec_varid = var_dimids(4)
+  lvl_varid = var_dimids(3)
+  lat_varid = var_dimids(2)
+  lon_varid = var_dimids(1)
   dat_varid = varid
 
   dd = (lvl_varid < 0)
 
+  print *, 'dimids, varid, whether it is reduced'
   write(*, *) var_dimids, varid, dd
+
+  print *, 'nlat, nlon, nlev, nrec'
+  print *, nlat, nlon, nlev, nrec
 
   call check(nf_get_var_real(ncid,lon_varid,lon))
   call check(nf_get_var_real(ncid,lat_varid,lat))
