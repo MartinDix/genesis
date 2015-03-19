@@ -40,7 +40,6 @@ OUTPUT = genesis
 genesis:
 	$(FC) -c ${FCFLAGS} *.f
 	$(FC) -c ${FCFLAGS} global.f90
-	$(FC) -c ${FCFLAGS} modulus.f90
 	$(FC) -c ${FCFLAGS} *.f90 $(LIBDIR) $(LIBS) $(INCDIR)
 	$(FC) -c ${FCFLAGS} relh2q.f90 establ.o
 	$(FC) -c ${FCFLAGS} q2relh.f90 establ.o
