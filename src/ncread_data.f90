@@ -52,7 +52,9 @@ subroutine ncread_data(ncid,nvar,nlon,nlat,nlev,nrec,  &
   lon_varid = var_dimids(4)
   dat_varid = varid
 
-  dd = (nvar == 4)
+  dd = (lvl_varid < 0)
+
+  write(*, *) var_dimids, varid, dd
 
   call check(nf_get_var_real(ncid,lon_varid,lon))
   call check(nf_get_var_real(ncid,lat_varid,lat))
