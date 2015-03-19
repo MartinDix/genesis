@@ -667,7 +667,7 @@ program genesis
 
   call charney_phillips(NRECS,NLVLS,levs,z,u,v,w,t,q,pt,msl,gradt,gradq, &
     &      u_um,v_um,w_um,t_um,q_um,p_um,pt_um, &
-    &                              gradt_um,gradq_um,debug)
+    &                              gradt_um,gradq_um)
 
   !  call charney_phillips(NRECS,NLVLS,levs,z,u,ug,v,vg,w,t,q,pt,msl,gradt,gradq, &
     !     &      u_um,ug_um,v_um,vg_um,w_um,t_um,q_um,p_um,pt_um, &
@@ -688,8 +688,6 @@ program genesis
   close(4)
 
   print *,'Outfile written successfully: charney.scm'
-
-
 
   !------ Create UM-SCM namelist ------
   !

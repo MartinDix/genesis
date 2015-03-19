@@ -13,7 +13,6 @@ subroutine geostr(frclat,nrec,nlev,nlat,nlon,levs,  &
 
   implicit none
 
-
   !------ Input ------
   !
   real,dimension(nrec),intent(in)       :: frclat

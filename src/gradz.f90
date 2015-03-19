@@ -1,108 +1,100 @@
-
 subroutine gradz(nrec,nlev,levs,temp,spechum,omega,gradtz,gradqz)
 
-    !       Derives vertical gradients of temperature and moisture on pressure
-    !       half-levels for inclusion in advective tendency calculation.
-    !       - vjb 13/1/2011
+  !       Derives vertical gradients of temperature and moisture on pressure
+  !       half-levels for inclusion in advective tendency calculation.
+  !       - vjb 13/1/2011
 
-    use global
+  implicit none
 
-    implicit none
+  !------ Input ------
+  !
+  integer,intent(in)  :: nrec
+  integer,intent(in)  :: nlev
 
-    !------ Input ------
-    !
-    integer,intent(in)				:: nrec
-    integer,intent(in)				:: nlev
+  real,dimension(nlev),intent(in)  :: levs
 
-    real,dimension(nlev),intent(in)			:: levs
+  real,dimension(nlev,nrec),intent(in)  :: temp
+  real,dimension(nlev,nrec),intent(in)  :: spechum
+  real,dimension(nlev,nrec),intent(in)  :: omega
 
-    real,dimension(nlev,nrec),intent(in)		:: temp
-    real,dimension(nlev,nrec),intent(in)		:: spechum
-    real,dimension(nlev,nrec),intent(in)		:: omega
+  !------ Working variables/arrays ------
+  !
+  integer  :: k,rec
 
-    !------ Working variables/arrays ------
-    !
-    integer						:: i,j,k,rec
+  real,dimension(nlev)  :: dp
+  real,dimension(nlev,nrec)  :: dt
+  real,dimension(nlev,nrec)  :: dq
 
-    real,dimension(nlev)				:: dp
-    real,dimension(nlev)				:: dpm1
-    real,dimension(nlev)				:: dpp1
+  !------ Output arrays ------
+  !
+  real,dimension(nlev,nrec)  :: gradtz
+  real,dimension(nlev,nrec)  :: gradqz
 
-    real,dimension(nlev,nrec)			:: dt
-    real,dimension(nlev,nrec)			:: dq
+  !------ kick off ------
+  !
 
+  do rec=1,nrec
+    do k=1,nlev
 
-    !------ Output arrays ------
-    !
-    real,dimension(nlev,nrec)			:: gradtz
-    real,dimension(nlev,nrec)			:: gradqz
+      if (k.eq.1.and.omega(k,rec).gt.0)then
 
+        dp(k) = (levs(k+1) - levs(k)) / 2
 
-    !------ kick off ------
-    !
+        dt(k,rec) = (temp(k+1,rec) - temp(k,rec)) / 2
+        dq(k,rec) = (spechum(k+1,rec) - spechum(k,rec)) / 2
 
-    do rec=1,nrec
-        do k=1,nlev
+        gradtz(k,rec) = dt(k,rec) / dp(k)
+        gradqz(k,rec) = dq(k,rec) / dp(k)
 
-            if (k.eq.1.and.omega(k,rec).gt.0)then
+      elseif (k.eq.1.and.omega(k,rec).le.0)then
 
-                dp(k) = (levs(k+1) - levs(k)) / 2
+        !           dp(k) = 0
 
-                dt(k,rec) = (temp(k+1,rec) - temp(k,rec)) / 2
-                dq(k,rec) = (spechum(k+1,rec) - spechum(k,rec)) / 2
+        dt(k,rec) = 0
+        dq(k,rec) = 0
 
-                gradtz(k,rec) = dt(k,rec) / dp(k)
-                gradqz(k,rec) = dq(k,rec) / dp(k)
+        gradtz(k,rec) = 0
+        gradqz(k,rec) = 0
 
-            elseif (k.eq.1.and.omega(k,rec).le.0)then
+      elseif (k.eq.nlev.and.omega(k,rec).le.0)then
 
-                !           dp(k) = 0
+        dp(k) = (levs(k-1) - levs(k)) / 2
 
-                dt(k,rec) = 0
-                dq(k,rec) = 0
+        dt(k,rec) = (temp(k-1,rec) - temp(k,rec)) / 2
+        dq(k,rec) = (spechum(k-1,rec) - spechum(k,rec)) / 2
 
-                gradtz(k,rec) = 0
-                gradqz(k,rec) = 0
+        gradtz(k,rec) = dt(k,rec) / dp(k)
+        gradqz(k,rec) = dq(k,rec) / dp(k)
 
-            elseif (k.eq.nlev.and.omega(k,rec).le.0)then
+      elseif (k.eq.nlev.and.omega(k,rec).gt.0)then
 
-                dp(k) = (levs(k-1) - levs(k)) / 2
+        !     dp(k) = 0
 
-                dt(k,rec) = (temp(k-1,rec) - temp(k,rec)) / 2
-                dq(k,rec) = (spechum(k-1,rec) - spechum(k,rec)) / 2
+        dt(k,rec) = 0
+        dq(k,rec) = 0
 
-                gradtz(k,rec) = dt(k,rec) / dp(k)
-                gradqz(k,rec) = dq(k,rec) / dp(k)
+        gradtz(k,rec) = 0
+        gradqz(k,rec) = 0
 
-            elseif (k.eq.nlev.and.omega(k,rec).gt.0)then
+      else
 
-                !	   dp(k) = 0
+        dp(k) = ((levs(k+1) + levs(k))/2) - ((levs(k-1) + levs(k))/2)
 
-                dt(k,rec) = 0
-                dq(k,rec) = 0
+        dt(k,rec) = ((temp(k+1,rec) + temp(k,rec))/2) - ((temp(k-1,rec) + temp(k,rec))/2)
 
-                gradtz(k,rec) = 0
-                gradqz(k,rec) = 0
+        dq(k,rec) = ((spechum(k+1,rec) + spechum(k,rec))/2) - ((spechum(k-1,rec) + spechum(k,rec))/2)
 
-            else
+        gradtz(k,rec) = dt(k,rec) / dp(k)
+        gradqz(k,rec) = dq(k,rec) / dp(k)
 
-                dp(k) = ((levs(k+1) + levs(k))/2) - ((levs(k-1) + levs(k))/2)
-
-                dt(k,rec) = ((temp(k+1,rec) + temp(k,rec))/2) - ((temp(k-1,rec) + temp(k,rec))/2)
-
-                dq(k,rec) = ((spechum(k+1,rec) + spechum(k,rec))/2) - ((spechum(k-1,rec) + spechum(k,rec))/2)
-
-                gradtz(k,rec) = dt(k,rec) / dp(k)
-                gradqz(k,rec) = dq(k,rec) / dp(k)
-
-            endif
-
-        enddo
+      endif
 
     enddo
 
-    print *,'gradtz,gradqz =',gradtz,gradqz
+  enddo
 
-    return
+  print *,'gradtz,gradqz =',gradtz,gradqz
+
+  return
 
 end subroutine gradz

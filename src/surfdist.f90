@@ -1,7 +1,6 @@
 !------ surfdist -------
 !great circle distance between lat/lon pairs
 !
-
 real function surfdist(lat1,lon1,lat2,lon2)
 
     implicit none
@@ -11,7 +10,6 @@ real function surfdist(lat1,lon1,lat2,lon2)
     real lon1,lat1,lon2,lat2
     real cosang
     real ang
-    real rad
     real radian
 
     cosang = cos(radian(lon2)-radian(lon1))

@@ -44,41 +44,41 @@ subroutine search_grid(usrpt,dat,max,positive,index,debug)
       gridpt = gridpt+delta
     enddo up_loop
 
-   index = n
+    index = n
 
- else      ! search 'down' 5 deg in steps of 0.01
+  else      ! search 'down' 5 deg in steps of 0.01
 
-   gridpt = usrpt
-   down_loop: do m=1,mmax
-     do n=max,1,-1
-       dd = gridpt-dat(n)
-       if (abs(dd).le.gacc)then
-         exit down_loop
-       endif
-     enddo
-     gridpt = gridpt-delta
-   enddo down_loop
+    gridpt = usrpt
+    down_loop: do m=1,mmax
+      do n=max,1,-1
+        dd = gridpt-dat(n)
+        if (abs(dd).le.gacc)then
+          exit down_loop
+        endif
+      enddo
+      gridpt = gridpt-delta
+    enddo down_loop
 
-   index = n
+    index = n
 
- endif
+  endif
 
- !------------------------------------------------------------
- !my search calc
- !	 gridpt = usrpt				! initialise
- !          nn=-1
- !	  do n=1,max
- !	   dd = gridpt-dat(n)
- !           if(nn.lt.0.and.dd.le.0.0) nn = n
- !           print *,'n,nn,dd,dat(n),usrpt=',n,nn,dd,dat(n),usrpt
- !	  enddo
- !	if (positive)then
- !	  index = nn
- !	else
- !	  index = nn - 1
- !	endif
- !------------------------------------------------------------
+  !------------------------------------------------------------
+  !my search calc
+  !	 gridpt = usrpt				! initialise
+  !          nn=-1
+  !	  do n=1,max
+  !	   dd = gridpt-dat(n)
+  !           if(nn.lt.0.and.dd.le.0.0) nn = n
+  !           print *,'n,nn,dd,dat(n),usrpt=',n,nn,dd,dat(n),usrpt
+  !	  enddo
+  !	if (positive)then
+  !	  index = nn
+  !	else
+  !	  index = nn - 1
+  !	endif
+  !------------------------------------------------------------
 
- return
+  return
 
- end
+end
