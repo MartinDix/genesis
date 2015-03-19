@@ -59,6 +59,8 @@ $(OBJS) : global.o
 genesis: $(OBJS)
 	$(FC) ${FCFLAGS} $(LIBDIR) $(LIBS) $(INCDIR) -o $@ $^
 
+geostr.o : radian.o
+
 all: genesis
 
 clean:
