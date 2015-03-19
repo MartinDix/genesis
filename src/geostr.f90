@@ -31,7 +31,7 @@ subroutine geostr(frclat,nrec,nlev,nlat,nlon,levs,  &
 
   !------ Working ------
   !
-  
+  real :: radian  ! function declared in radian.f90
   
   integer   :: k,rec
   !	real,dimension(:,:),allocatable		:: pt
@@ -39,8 +39,6 @@ subroutine geostr(frclat,nrec,nlev,nlat,nlon,levs,  &
   real          :: radlat
 
   
-  real          :: radian
-
   !------ Output ------
   !
   real,dimension(nlev,nrec),intent(out)   :: ug,vg
