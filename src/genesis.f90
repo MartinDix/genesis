@@ -548,7 +548,7 @@ allocate(ug(NLVLS,NRECS))
 allocate(vg(NLVLS,NRECS))
 allocate(pt(NLVLS,NRECS))
 
-call geostr(frclat,frclon,NRECS,NLVLS,NLATS,NLONS,levs,lats,lons,   &
+call geostr(frclat,NRECS,NLVLS,NLATS,NLONS,levs,   &
     &        frcynindex,frcysindex,frcxeindex,frcxwindex,t,z_in,dx,dy,ug,vg,f,pt,debug)
 
 !	if (debug) print *,'ug = ',((ug(k,j),k=1,NLVLS),j=1,NRECS)
