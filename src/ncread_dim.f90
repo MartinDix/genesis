@@ -100,7 +100,7 @@ subroutine ncread_dim(ncid,nvar,nlon,nlat,nlev,nrec,  &
   if (varid < 0) stop "ERROR: NO VARIABLE FOUND"
 
   call check(nf_inq_varndims(ncid, varid, var_ndims))
-  call check(nf_inq_dimid(ncid, varid, var_dimids))
+  call check(nf_inq_vardimid(ncid, varid, var_dimids))
 
   dd = (var_ndims == 3)
   if (dd) then
