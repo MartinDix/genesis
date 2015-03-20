@@ -15,7 +15,7 @@ INCDIR = -I${NETCDF_ROOT}/include/Intel
 
 F_SOURCES=establ.f  ngtopt.f
 F90_SOURCES=charney_phillips.f90 genesis.f90 gradz.f90 \
-            ncread_data.f90 radian.f90 slingo.f90      \
+            radian.f90 slingo.f90      \
 	    create_namelist.f90 geostr.f90 interp_linear.f90 \
 	    ncread_dim.f90 relh2q.f90 surfdist.f90 find_latlon.f90 \
 	    global.f90 q2relh.f90 search_grid.f90 netcdf_type.f90 \
