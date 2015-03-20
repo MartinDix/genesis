@@ -75,7 +75,7 @@ subroutine ncread_data_single_4D(nc_meta, var, data, debug)
   real, dimension(:), allocatable :: tmp_data
 
   allocate(tmp_data(size(data)))
-  ncread_data_single(nc_meta, var, tmp_data, debug)
+  call ncread_data_single(nc_meta, var, tmp_data, debug)
   data = reshape(tmp_data, shape(data))
   return
 end subroutine ncread_data_single_4D
