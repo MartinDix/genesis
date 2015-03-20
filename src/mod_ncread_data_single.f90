@@ -1,3 +1,8 @@
+module mod_ncread_data_single
+  implicit none
+
+contains
+
 subroutine ncread_data_single(nc_meta, var, data, debug)
   use netcdf_type
   use netcdf_check, only: check
@@ -53,3 +58,5 @@ subroutine ncread_data_single(nc_meta, var, data, debug)
 
   return
 end subroutine ncread_data_single
+
+end module mod_ncread_data_single

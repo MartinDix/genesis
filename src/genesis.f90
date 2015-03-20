@@ -25,6 +25,7 @@ program genesis
   use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
   use netcdf_type
   use netcdf_check, only: check
+  use mod_ncread_data_single, only ncread_data_single
 
   implicit none
   include 'netcdf.inc'

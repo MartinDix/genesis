@@ -67,7 +67,7 @@ genesis: $(OBJS)
 geostr.o: radian.o
 ncread_data_single.o: lower_module.o mod_int_to_str.o
 
-genesis.o: netcdf_check.o
+genesis.o: netcdf_check.o mod_ncread_data_single.o
 
 all: genesis
 
