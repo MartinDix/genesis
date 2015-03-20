@@ -24,8 +24,10 @@ program genesis
 
   use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
   use netcdf_type
+  use netcdf_check, only: check
 
   implicit none
+  include 'netcdf.inc'
 
   !  implicit none
 
@@ -238,105 +240,102 @@ program genesis
   !------- Open NetCDFs -------------------
   !
 
-  if (debug) print *,'Calling ncread_dim...'
+  ! Reading MSL -----------------------------------
 
-  do k=1,nfiles
+  call ncread_dim(nc_meta, debug, infile(1))
 
-    if (k.gt.1)then
-      deallocate(lons)
-      deallocate(lats)
-      deallocate(levs)
-      deallocate(rec)
-      deallocate(data)
-    endif
+  NLATS = nc_meta%lat_n
+  allocate(lats(NLATS))
+  call ncread_data_single(nc_meta, 'lat', lats, debug)
 
-    call ncread_dim(nc_meta,debug,infile(k))
+  NLONS = nc_meta%lon_n
+  allocate(lons(NLONS))
+  call ncread_data_single(nc_meta, 'lon', lons, debug)
 
-    NLONS = nc_meta%lon_n
-    NLATS = nc_meta%lat_n
-    NLVLS = nc_meta%lvl_n
-    NRECS = nc_meta%rec_n
+  NRECS = nc_meta%rec_n
+  allocate(rec(NRECS))
+  call ncread_data_single(nc_meta, 'rec', rec, debug)
 
-    allocate(lons(NLONS))
-    allocate(lats(NLATS))
-    allocate(levs(NLVLS))
-    allocate(rec(NRECS))
-    allocate(data(NLONS,NLATS,NLVLS,NRECS))
+  allocate(msl_in(NLONS,NLATS,1,NRECS))
+  call ncread_data_single(nc_meta, 'var', msl_in, debug)
 
-    if (debug) print *,'nlon,nlat,nlev,nrec = ',NLONS,NLATS,NLVLS,NRECS
+  if (pascal)then
+    msl_in = msl_in*100                          ! convert MSLP from hPa to Pa
+  endif
 
-    call ncread_data(nc_meta,lons,lats,levs,rec,data)
+  call check(nf_close(nc_meta%ncid), 'closing msl file')
 
-    if (k.eq.1)then
+  if (debug) print *,'msl = ',msl_in(1,20,1,1)
 
-      allocate(msl_in(NLONS,NLATS,NLVLS,NRECS))
 
-      msl_in = data
+  ! Reading Z -------------------------------------
 
-      if (pascal)then
-        msl_in = msl_in*100                          ! convert MSLP from hPa to Pa
-      endif
+  call ncread_dim(nc_meta, debug, infile(2))
 
-      if (debug) print *,'msl = ',msl_in(1,20,1,1)
+  NLVLS = nc_meta%lvl_n
+  allocate(levs(NLVLS))
+  call ncread_data_single(nc_meta, 'lvl', levs, debug)
 
-    elseif (k.eq.2)then
+  allocate(z_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_data_single(nc_meta, 'var', z_in, debug)
 
-      allocate(z_in(NLONS,NLATS,NLVLS,NRECS))
+  if (debug) print *,'z = ',z_in(1,10,1,1)
 
-      z_in = data
 
-      if (debug) print *,'z = ',z_in(1,10,1,1)
+  ! Reading U -------------------------------------
 
-    elseif (k.eq.3)then
+  call ncread_dim(nc_meta, debug, infile(3))
 
-      allocate(u_in(NLONS,NLATS,NLVLS,NRECS))
+  allocate(u_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_data_single(nc_meta, 'var', u_in, debug)
 
-      u_in = data
+  if (debug) print *,'u = ',u_in(1,10,1,1)
 
-      if (debug) print *,'u = ',u_in(1,1,1,1)
 
-    elseif (k.eq.4)then
+  ! Reading V -------------------------------------
 
-      allocate(v_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_dim(nc_meta, debug, infile(4))
 
-      v_in = data
+  allocate(v_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_data_single(nc_meta, 'var', v_in, debug)
 
-      if (debug) print *,'v = ',v_in(1,1,1,1)
+  if (debug) print *,'v = ',v_in(1,10,1,1)
 
-    elseif (k.eq.5)then
 
-      allocate(t_in(NLONS,NLATS,NLVLS,NRECS))
+  ! Reading T -------------------------------------
 
-      t_in = data
+  call ncread_dim(nc_meta, debug, infile(5))
 
-      if (debug) print *,'t = ',t_in(1,1,1,1)
+  allocate(t_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_data_single(nc_meta, 'var', t_in, debug)
 
-    elseif (k.eq.6)then
+  if (debug) print *,'t = ',t_in(1,10,1,1)
 
-      allocate(q_in(NLONS,NLATS,NLVLS,NRECS))
 
-      q_in = data
+  ! Reading Q -------------------------------------
 
-      if (debug) print *,'q = ',q_in(20,20,10,1)
-      if (.not. L_w_inOK) then
-        print *,'L_w_inOK',L_w_inOK
-        allocate(w_in(NLONS,NLATS,NLVLS,NRECS))           ! vjb 2.3
-        w_in = 0.0*q_in
-        if (debug) print *,'w = ',w_in(20,20,10,1)
-      endif
+  call ncread_dim(nc_meta, debug, infile(6))
 
-    elseif (k.eq.7)then
+  allocate(q_in(NLONS,NLATS,NLVLS,NRECS))
+  call ncread_data_single(nc_meta, 'var', q_in, debug)
 
-      allocate(w_in(NLONS,NLATS,NLVLS,NRECS))           ! vjb 2.3
+  if (debug) print *,'q = ',q_in(1,10,1,1)
 
-      w_in = data
 
-      if (debug) print *,'w = ',w_in(20,20,10,1)
+  ! Reading W -------------------------------------
 
-    endif
+  if (nfiles > 6) then
+    call ncread_dim(nc_meta, debug, infile(7))
 
-  enddo
+    allocate(w_in(NLONS,NLATS,NLVLS,NRECS))
+    call ncread_data_single(nc_meta, 'var', w_in, debug)
+    if (debug) print *,'w = ',w_in(1,10,1,1)
 
+  else if (.not. L_w_inOK) then
+    allocate(w_in(NLONS,NLATS,NLVLS,NRECS))
+    w_in = 0.0
+    if (debug) print *, 'w = 0.0'
+  end if
 
   !------- Note for later --------
   !

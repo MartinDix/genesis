@@ -19,7 +19,8 @@ F90_SOURCES=charney_phillips.f90 genesis.f90 gradz.f90 \
 	    create_namelist.f90 geostr.f90 interp_linear.f90 \
 	    ncread_dim.f90 relh2q.f90 surfdist.f90 find_latlon.f90 \
 	    global.f90 q2relh.f90 search_grid.f90 netcdf_type.f90 \
-	    netcdf_check.f90
+	    netcdf_check.f90, ncread_data_single.f90 lower_mod.f90 \
+	    mod_int_to_str.f90
 
 OBJS=$(F_SOURCES:.f=.o) $(F90_SOURCES:.f90=.o)
 
@@ -63,7 +64,8 @@ $(OBJS) : global.o
 genesis: $(OBJS)
 	$(FC) ${FCFLAGS} $(LIBDIR) $(LIBS) $(INCDIR) -o $@ $^
 
-geostr.o : radian.o
+geostr.o: radian.o
+ncread_data_single.o: lower_mod.o mod_int_to_str.o
 
 all: genesis
 

@@ -4,11 +4,21 @@ module netcdf_type
     integer, parameter :: NO_VALUE = -1000
 
     type :: netcdf_metadata
-      integer     :: ncid
-      integer     :: lat_varid, lon_varid, lvl_varid, rec_varid, var_varid
-      integer     :: lat_dimid, lon_dimid, lvl_dimid, rec_dimid
-      integer     :: lat_n, lon_n, lvl_n, rec_n
-      integer     :: ndims
+      integer     :: ncid = NO_VALUE
+      integer     :: lat_varid = NO_VALUE
+      integer     :: lon_varid = NO_VALUE
+      integer     :: lvl_varid = NO_VALUE
+      integer     :: rec_varid = NO_VALUE
+      integer     :: var_varid = NO_VALUE
+      integer     :: lat_dimid = NO_VALUE
+      integer     :: lon_dimid = NO_VALUE
+      integer     :: lvl_dimid = NO_VALUE
+      integer     :: rec_dimid = NO_VALUE
+      integer     :: lat_n = NO_VALUE
+      integer     :: lon_n = NO_VALUE
+      integer     :: lvl_n = NO_VALUE
+      integer     :: rec_n = NO_VALUE
+      integer     :: ndims = NO_VALUE
     end type netcdf_metadata
 
 end module netcdf_type
