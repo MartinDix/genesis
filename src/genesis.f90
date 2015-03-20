@@ -25,7 +25,7 @@ program genesis
   use global, only: max_nrecs, maxfiles, num, secday, umlev, zero
   use netcdf_type
   use netcdf_check, only: check
-  use mod_ncread_data_single, only ncread_data_single
+  use mod_ncread_data_single
 
   implicit none
   include 'netcdf.inc'
@@ -258,7 +258,7 @@ program genesis
   call ncread_data_single(nc_meta, 'rec', rec, debug)
 
   allocate(msl_in(NLONS,NLATS,1,NRECS))
-  call ncread_data_single(nc_meta, 'var', msl_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', msl_in, debug)
 
   if (pascal)then
     msl_in = msl_in*100                          ! convert MSLP from hPa to Pa
@@ -278,7 +278,7 @@ program genesis
   call ncread_data_single(nc_meta, 'lvl', levs, debug)
 
   allocate(z_in(NLONS,NLATS,NLVLS,NRECS))
-  call ncread_data_single(nc_meta, 'var', z_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', z_in, debug)
 
   if (debug) print *,'z = ',z_in(1,10,1,1)
 
@@ -288,7 +288,7 @@ program genesis
   call ncread_dim(nc_meta, debug, infile(3))
 
   allocate(u_in(NLONS,NLATS,NLVLS,NRECS))
-  call ncread_data_single(nc_meta, 'var', u_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', u_in, debug)
 
   if (debug) print *,'u = ',u_in(1,10,1,1)
 
@@ -298,7 +298,7 @@ program genesis
   call ncread_dim(nc_meta, debug, infile(4))
 
   allocate(v_in(NLONS,NLATS,NLVLS,NRECS))
-  call ncread_data_single(nc_meta, 'var', v_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', v_in, debug)
 
   if (debug) print *,'v = ',v_in(1,10,1,1)
 
@@ -308,7 +308,7 @@ program genesis
   call ncread_dim(nc_meta, debug, infile(5))
 
   allocate(t_in(NLONS,NLATS,NLVLS,NRECS))
-  call ncread_data_single(nc_meta, 'var', t_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', t_in, debug)
 
   if (debug) print *,'t = ',t_in(1,10,1,1)
 
@@ -318,7 +318,7 @@ program genesis
   call ncread_dim(nc_meta, debug, infile(6))
 
   allocate(q_in(NLONS,NLATS,NLVLS,NRECS))
-  call ncread_data_single(nc_meta, 'var', q_in, debug)
+  call ncread_data_single_4D(nc_meta, 'var', q_in, debug)
 
   if (debug) print *,'q = ',q_in(1,10,1,1)
 
@@ -329,7 +329,7 @@ program genesis
     call ncread_dim(nc_meta, debug, infile(7))
 
     allocate(w_in(NLONS,NLATS,NLVLS,NRECS))
-    call ncread_data_single(nc_meta, 'var', w_in, debug)
+    call ncread_data_single_4D(nc_meta, 'var', w_in, debug)
     if (debug) print *,'w = ',w_in(1,10,1,1)
 
   else if (.not. L_w_inOK) then

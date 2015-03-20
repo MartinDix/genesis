@@ -59,4 +59,26 @@ subroutine ncread_data_single(nc_meta, var, data, debug)
   return
 end subroutine ncread_data_single
 
+subroutine ncread_data_single_4D(nc_meta, var, data, debug)
+  use netcdf_type
+  use netcdf_check, only: check
+  use lower_module, only: to_lower
+  use mod_int_to_str, only: int_to_str
+  implicit none
+  include 'netcdf.inc'
+
+  type(netcdf_metadata), intent(in)           :: nc_meta
+  character(len=3), intent(in)                :: var
+  logical, intent(in)                         :: debug
+  real, dimension(:, :, :, :), intent(out)    :: data
+
+  real, dimension(:), allocatable :: tmp_data
+
+  allocate(tmp_data(size(data)))
+  ncread_data_single(nc_meta, var, tmp_data, debug)
+  data = reshape(tmp_data, shape(data))
+  return
+end subroutine ncread_data_single_4D
+
+
 end module mod_ncread_data_single
